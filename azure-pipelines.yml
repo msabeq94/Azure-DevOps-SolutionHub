@@ -43,8 +43,6 @@ stages:
       - deployment: 'Terraform_Apply'
         pool: default
         environment: 'testenv'
-      - job: terraform
-        displayName: 'Run Terraform'
         steps:
           - checkout: self
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
