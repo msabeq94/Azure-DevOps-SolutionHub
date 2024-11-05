@@ -40,6 +40,9 @@ stages:
   - stage: Terraform
     displayName: 'Terraform Deploy'
     jobs:
+      - deployment: 'Terraform_Apply'
+        pool: default
+        environment: 'testenv'
       - job: terraform
         displayName: 'Run Terraform'
         steps:
