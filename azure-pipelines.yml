@@ -40,7 +40,7 @@ parameters:
   displayName: "Budget amount"
   type: object
   default: "<Please Provide the Budget Amount>"
- pool: default
+  pool: default
   #name: AzureSHPool
 stages:
   - stage: Terraform
