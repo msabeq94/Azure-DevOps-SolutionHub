@@ -1,0 +1,73 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- none
+parameters:
+- name: location
+  displayName: "Azure region"
+  type: object
+  default: uksouth
+
+- name: customer_client_id
+  displayName: "Customer Client ID"
+  type: object
+  default: "<Please Provide the Customer Client ID>"
+
+- name: customer_client_secret
+  displayName: "Customer Client Seceret"
+  type: object
+  default: "<Please Provide the Client Seceret>"
+  
+- name: customer_tenant_id
+  displayName: "Customer Tenant ID"
+  type: object
+  default: "<Please Provide the Tenant ID>"
+
+- name: customer_subscription_id
+  displayName: "Customer Subscription ID"
+  type: object
+  default: "<Please Provide the Subscription ID>"
+  
+- name: customer_budget_contact_email
+  displayName: "Budget notification Email"
+  type: object
+  default: "<Please Provide the Email for Budget Notif>"
+
+- name: budget_amount
+  displayName: "Budget amount"
+  type: object
+  default: "<Please Provide the Budget Amount>"
+pool:
+  vmImage: ubuntu-latest
+  #name: AzureSHPool
+stages:
+  - stage: Terraform
+    displayName: 'Terraform Deploy'
+    jobs:
+      - job: terraform
+        displayName: 'Run Terraform'
+        steps:
+        - checkout: self
+        #  inputs:
+        #    azureSubscription: 'Build testing'
+        #    scriptType: 'bash'
+        #    scriptLocation: 'inlineScript'
+        #    inlineScript: 'az account show'
+        - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
+        - script: |
+            echo "Location: ${{ parameters.location }}"
+          displayName: 'Print Parameter Values'
+        - script: |
+            #curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            terraform init
+          displayName: 'Terraform Init'
+        - script: |
+            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var customer_budget_contact_email=${{ parameters.customer_budget_contact_email}} -var budget_amount=${{ parameters.budget_amount}} -out=tfplan
+          displayName: 'Terraform Plan'
+        - script: |
+            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var customer_budget_contact_email=${{ parameters.customer_budget_contact_email}} -var budget_amount=${{ parameters.budget_amount}} 
+          displayName: 'Terraform Apply'
+          
