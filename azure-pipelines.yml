@@ -37,12 +37,16 @@ parameters:
   default: "<Please Provide the Budget Amount>"
 
 stages:
-  - stage: Terraform
-    displayName: 'Terraform Deploy'
-    jobs:
-      - job: terraform
-        displayName: 'Run Terraform'
-        steps:
+- stage: 'Terraform_Apply'
+  displayName: 'Terraform Apply'
+  jobs:
+  - deployment: 'Terraform_Apply'
+    pool: default
+    environment: 'testenv'  # using an ADO environment allows us to add a manual approval check
+    strategy:
+      runOnce:
+        deploy:
+          steps:
           - checkout: self
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
           - script: |
