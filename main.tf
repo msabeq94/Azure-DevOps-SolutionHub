@@ -18,9 +18,9 @@ resource "azurerm_resource_group" "test-rg" {
 }
 data "azurerm_client_config" "current" {}
 
-data "azuread_user" "admin_user" {
-  user_principal_name = "admin@spydertest3.onmicrosoft.com"
-}
+#data "azuread_user" "admin_user" {
+ # user_principal_name = "admin@spydertest3.onmicrosoft.com"
+#}
 resource "azuread_group" "vf_core_subscription_owner" {
   display_name = "vf-core-subscription-owner_build_testing"
   description = "Allows the member to manage the subscription as the owner"
