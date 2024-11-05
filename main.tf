@@ -21,13 +21,13 @@ data "azurerm_client_config" "current" {}
 #data "azuread_user" "admin_user" {
  # user_principal_name = "admin@spydertest3.onmicrosoft.com"
 #}
-resource "azuread_group" "vf_core_subscription_owner" {
-  display_name = "vf-core-subscription-owner_build_testing"
-  description = "Allows the member to manage the subscription as the owner"
-  owners = try([azuread_user.create_subscription_owner.object_id],[data.azurerm_client_config.current.object_id])
-  members = try([azuread_user.create_subscription_owner.object_id],[])
-  security_enabled = true
-}
+# resource "azuread_group" "vf_core_subscription_owner" {
+#   display_name = "vf-core-subscription-owner_build_testing"
+#   description = "Allows the member to manage the subscription as the owner"
+#   owners = try([azuread_user.create_subscription_owner.object_id],[data.azurerm_client_config.current.object_id])
+#   members = try([azuread_user.create_subscription_owner.object_id],[])
+#   security_enabled = true
+# }
 # resource "azuread_user" "create_subscription_owner" {
 #   display_name = "ashokaaa"
 #   password = random_password.customer_subscription_owner_password.result
@@ -43,18 +43,18 @@ resource "azuread_group" "vf_core_subscription_owner" {
 #   upper = true
 # }
 
-output "customer_subscription_owner_username" {
-  value = try(azuread_user.create_subscription_owner.object_id,"Customer Subscription Owner not defined")
-}
+# output "customer_subscription_owner_username" {
+#   value = try(azuread_user.create_subscription_owner.object_id,"Customer Subscription Owner not defined")
+# }
 
-output "customer_subscription_owner_email" {
-  value = try(azuread_user.create_subscription_owner.user_principal_name,"Customer Subscription Owner not defined")
-}
+# output "customer_subscription_owner_email" {
+#   value = try(azuread_user.create_subscription_owner.user_principal_name,"Customer Subscription Owner not defined")
+# }
 
-output "customer_subscription_owner_password" {
-  value = try(azuread_user.create_subscription_owner.password,"Customer Subscription Owner not defined")
-  sensitive = true
-}
+# output "customer_subscription_owner_password" {
+#   value = try(azuread_user.create_subscription_owner.password,"Customer Subscription Owner not defined")
+#   sensitive = true
+# }
 
 
 #https://confluence.tools.aws.vodafone.com/display/CSAR/Microsoft+Entra+ID+Tenant+and+Azure+Subscription+Deployment+Blueprint#MicrosoftEntraIDTenantandAzureSubscriptionDeploymentBlueprint-CostControlConfiguration
