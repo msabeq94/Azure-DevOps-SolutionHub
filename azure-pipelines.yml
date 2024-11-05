@@ -48,7 +48,6 @@ stages:
         deploy:
           steps:
           - checkout: self
-          - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
           - script: |
               echo "Location: ${{ parameters.location }}"
             displayName: 'Print Parameter Values'
