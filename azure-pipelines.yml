@@ -45,7 +45,7 @@ stages:
         environment: 'testenv'
       - job: terraform
         displayName: 'Run Terraform'
-         dependsOn: terraform
+        dependsOn: terraform
         steps:
           - checkout: self
           - task: ms-devlabs.custom-terraform-tasks.custom-terraform-installer-task.TerraformInstaller@0
