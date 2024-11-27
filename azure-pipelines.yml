@@ -24,7 +24,7 @@ parameters:
 - name: customer_subscription_id
   displayName: "Customer Subscription ID"
   type: object
-  default: "<Please Provide the Subscription ID>"
+  default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
   
 - name:  default_domain_name
   displayName: "Default Domain Name"
