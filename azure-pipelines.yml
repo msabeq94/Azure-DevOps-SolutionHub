@@ -16,7 +16,6 @@ parameters:
   type: string
   default: "viG8Q~afrRrjdtZOEaQzTnEFLw1ThJqMkSPendfj"
   
-  
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
@@ -27,7 +26,7 @@ parameters:
   type: string
   default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
   
-- name:  default_domain_name
+- name: default_domain_name
   displayName: "Default Domain Name"
   type: string
   default: "mohamedomar18live"
@@ -42,15 +41,15 @@ parameters:
   type: string
   default: "1"
 
-
-
-
 stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
   pool: default
   jobs:
     - job: CreateTerraformWorkspace
+      workspace:
+        clean: all
+        shared: true
       steps:
         - script: |
             echo "Location: ${{ parameters.location }}"
@@ -61,25 +60,32 @@ stages:
           displayName: 'Create new Terraform workspace' 
     - job: TerraformInit
       dependsOn: CreateTerraformWorkspace
+      workspace:
+        shared: true
       steps:
         - script: |
              terraform init
-      displayName:  'terraform init'
+      displayName: 'terraform init'
     - job: TerraformPlan
       dependsOn: TerraformInit
+      workspace:
+        shared: true
       steps:
         - script: |
-            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
-      displayName:  'Terraform Plan'
-
+            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}} -out=tfplan
+      displayName: 'Terraform Plan'
     - job: TerraformApply
       dependsOn: TerraformPlan
+      workspace:
+        shared: true
       steps:
         - script: |
              terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  
-      displayName:  'Terraform Apply'
+      displayName: 'Terraform Apply'
     - job: TerraformOutput
       dependsOn: TerraformApply
+      workspace:
+        shared: true
       steps:
         - script: |
             terraform output "customer_subscription_owner_password"
@@ -89,7 +95,6 @@ stages:
             targetPath: "${{parameters.default_domain_name}}.txt"
             artifact: "${{parameters.default_domain_name}}"
             publishLocation: 'pipeline'
-
   
 
       
