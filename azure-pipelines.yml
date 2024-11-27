@@ -68,9 +68,6 @@ stages:
               terraform workspace new $workspace
             displayName: 'Create new Terraform workspace' 
           - script: |
-              terraform workspace select $workspace
-            displayName: 'Select the new Terraform workspace'
-          - script: |
               terraform init
             displayName: 'Terraform Init'
           - script: |
