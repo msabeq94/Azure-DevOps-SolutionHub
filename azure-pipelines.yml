@@ -3,42 +3,42 @@ trigger:
 parameters:
 - name: location
   displayName: "Azure region"
-  type: object
+  type: string
   default: 'eastus'
 
 - name: customer_client_id
   displayName: "Customer Client ID"
-  type: object
+  type: string
   default: "ad019710-d8a6-46ad-add7-c05a9e9da443"
 
 - name: customer_client_secret
   displayName: "Customer Client Secret"
-  type: object
+  type: string
   default: "a0b346dc-e218-4a2d-bfc7-3bc45d346551"
   
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
-  type: object
+  type: string
   default: "e22861cb-ba60-48a7-8d82-fa8e4267a5bd"
 
 - name: customer_subscription_id
   displayName: "Customer Subscription ID"
-  type: object
+  type: string
   default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
   
 - name:  default_domain_name
   displayName: "Default Domain Name"
-  type: object
+  type: string
   default: "mohamedomar18live"
 
 - name: customer_subscription_owner_first_name
   displayName: "Subscription Owner First Name"
-  type: object
+  type: string
   default: "devops"
 
 - name: customer_subscription_owner_last_name 
   displayName: "Subscription Owner Last Name"
-  type: object
+  type: string
   default: "1"
 
 
