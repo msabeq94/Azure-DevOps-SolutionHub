@@ -63,11 +63,12 @@ stages:
             displayName: 'Print Parameter Values'
           - script: |
               dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
+              workspace=my_workspace_${dateYMD}
               echo  $dateYMD
-              terraform workspace new my_workspace_${dateYMD}
+              terraform workspace new $workspace
             displayName: 'Create new Terraform workspace' 
           - script: |
-              terraform workspace select my_workspace_${dateYMD}
+              terraform workspace select $workspace
             displayName: 'Select the new Terraform workspace'
           - script: |
               terraform init
