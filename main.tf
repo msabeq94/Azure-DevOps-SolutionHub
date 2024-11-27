@@ -45,6 +45,7 @@ resource "random_password" "customer_subscription_owner_password" {
 
 output "customer_subscription_owner_password" {
   value = try(azuread_user.create_subscription_owner.password,"Customer Subscription Owner not defined")
+  sensitive = true
   
 }
 
