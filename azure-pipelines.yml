@@ -63,11 +63,11 @@ stages:
               terraform init
             displayName: 'Terraform Init'
           - script: |
-              terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
+              terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
               
             displayName: 'Terraform Plan'
           - script: |
-              terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
+              terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
             displayName: 'Terraform Apply'
           - script: |
              terraform output "customer_subscription_owner_password"
