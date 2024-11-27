@@ -23,7 +23,7 @@ provider "azuread" {
 resource "azuread_user" "create_subscription_owner" {
   display_name = "${var.customer_subscription_owner_first_name} ${var.customer_subscription_owner_last_name}"
   password = random_password.customer_subscription_owner_password.result
-  user_principal_name = "${customer_subscription_owner_first_name}.${var.customer_subscription_owner_last_name}@${var.domain_name}.onmicrosoft.com"
+  user_principal_name = "${var.customer_subscription_owner_first_name}.${var.customer_subscription_owner_last_name}@${var.domain_name}.onmicrosoft.com"
 }
 
 resource "random_password" "customer_subscription_owner_password" {
