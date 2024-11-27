@@ -14,7 +14,7 @@ parameters:
 - name: customer_client_secret
   displayName: "Customer Client Secret"
   type: string
-  default: "a0b346dc-e218-4a2d-bfc7-3bc45d346551"
+  default: "viG8Q~afrRrjdtZOEaQzTnEFLw1ThJqMkSPendfj"
   
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
