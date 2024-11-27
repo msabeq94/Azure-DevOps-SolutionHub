@@ -66,7 +66,34 @@ stages:
             artifact: "${{parameters.default_domain_name}}"
             publishLocation: 'pipeline'
             
+- stage: savepassword
+  dependsOn: GetFirewallPublicIP
+  jobs:
+    - job: SavePASSToKeyVault
+      displayName: "Save password to KeyVault"
+      steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: "${{parameters.default_domain_name}}"
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'vf-cor-devops-pcr-access'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
+                echo $ownerPass
+                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
+            displayName: 'Save password to KeyVault'
 
+          # - script: |
+              
+          #     ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}')
+          #     echo $ownerPass
+          #     az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
+            
+          #   displayName: 'Save password to KeyVault'
+  
 # - stage: TerraformApply
 #   displayName:  'Terraform Apply'
   
