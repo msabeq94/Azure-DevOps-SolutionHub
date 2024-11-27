@@ -1,6 +1,5 @@
 provider "azurerm" {
   features {}
-  skip_provider_registration = true
   subscription_id = var.customer_subscription_id
   client_id = var.customer_client_id
   client_secret = var.customer_client_secret
@@ -12,36 +11,29 @@ provider "azuread" {
   tenant_id = var.customer_tenant_id
 }
 
-resource "azurerm_resource_group" "test-rg" {
-  location = var.location
-  name     = "vf-devops-${var.location}-resources"
+
+# resource "azurerm_resource_group" "test-rg" {
+#   location = var.location
+#   name     = "vf-devops-${var.location}-resources"
+# }
+# data "azurerm_client_config" "current" {}
+
+
+
+resource "azuread_user" "create_subscription_owner" {
+  display_name = "${var.customer_subscription_owner_first_name} ${var.customer_subscription_owner_last_name}"
+  password = random_password.customer_subscription_owner_password.result
+  user_principal_name = "${customer_subscription_owner_first_name}.${var.customer_subscription_owner_last_name}@${var.domain_name}.onmicrosoft.com"
 }
-data "azurerm_client_config" "current" {}
 
-#data "azuread_user" "admin_user" {
- # user_principal_name = "admin@spydertest3.onmicrosoft.com"
-#}
-# resource "azuread_group" "vf_core_subscription_owner" {
-#   display_name = "vf-core-subscription-owner_build_testing"
-#   description = "Allows the member to manage the subscription as the owner"
-#   owners = try([azuread_user.create_subscription_owner.object_id],[data.azurerm_client_config.current.object_id])
-#   members = try([azuread_user.create_subscription_owner.object_id],[])
-#   security_enabled = true
-# }
-# resource "azuread_user" "create_subscription_owner" {
-#   display_name = "ashokaaa"
-#   password = random_password.customer_subscription_owner_password.result
-#   user_principal_name = "ashokaaa.maurya@spydertechuk.onmicrosoft.com"
-# }
-
-# resource "random_password" "customer_subscription_owner_password" {
-#   length = 16
-#   special = true
-#   override_special = "!@#$"
-#   lower = true
-#   numeric = true
-#   upper = true
-# }
+resource "random_password" "customer_subscription_owner_password" {
+  length = 16
+  special = true
+  override_special = "!@#$"
+  lower = true
+  numeric = true
+  upper = true
+}
 
 # output "customer_subscription_owner_username" {
 #   value = try(azuread_user.create_subscription_owner.object_id,"Customer Subscription Owner not defined")
@@ -51,10 +43,10 @@ data "azurerm_client_config" "current" {}
 #   value = try(azuread_user.create_subscription_owner.user_principal_name,"Customer Subscription Owner not defined")
 # }
 
-# output "customer_subscription_owner_password" {
-#   value = try(azuread_user.create_subscription_owner.password,"Customer Subscription Owner not defined")
-#   sensitive = true
-# }
+output "customer_subscription_owner_password" {
+  value = try(azuread_user.create_subscription_owner.password,"Customer Subscription Owner not defined")
+  sensitive = true
+}
 
 
 #https://confluence.tools.aws.vodafone.com/display/CSAR/Microsoft+Entra+ID+Tenant+and+Azure+Subscription+Deployment+Blueprint#MicrosoftEntraIDTenantandAzureSubscriptionDeploymentBlueprint-CostControlConfiguration
@@ -62,9 +54,9 @@ data "azurerm_client_config" "current" {}
 Section: 7.9.1. Cost Management Budgets
 */
   
-locals {
-  current_year_month = formatdate("YYYY-MM",timestamp())
-}
+# locals {
+#   current_year_month = formatdate("YYYY-MM",timestamp())
+# }
 
 #https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/consumption_budget_subscription
 # resource "azurerm_consumption_budget_subscription" "vf_core_budget" {

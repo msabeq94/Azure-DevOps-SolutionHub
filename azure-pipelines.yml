@@ -4,37 +4,45 @@ parameters:
 - name: location
   displayName: "Azure region"
   type: object
-  default: uksouth
+  default: 'eastus'
 
 - name: customer_client_id
   displayName: "Customer Client ID"
   type: object
-  default: "<Please Provide the Customer Client ID>"
+  default: "ad019710-d8a6-46ad-add7-c05a9e9da443"
 
 - name: customer_client_secret
   displayName: "Customer Client Secret"
   type: object
-  default: "<Please Provide the Client Secret>"
+  default: "a0b346dc-e218-4a2d-bfc7-3bc45d346551"
   
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: object
-  default: "<Please Provide the Tenant ID>"
+  default: "e22861cb-ba60-48a7-8d82-fa8e4267a5bd"
 
 - name: customer_subscription_id
   displayName: "Customer Subscription ID"
   type: object
   default: "<Please Provide the Subscription ID>"
   
-- name: customer_budget_contact_email
-  displayName: "Budget notification Email"
+- name:  default_domain_name
+  displayName: "Default Domain Name"
   type: object
-  default: "<Please Provide the Email for Budget Notif>"
+  default: "mohamedomar18live"
 
-- name: budget_amount
-  displayName: "Budget amount"
+- name: customer_subscription_owner_first_name
+  displayName: "Subscription Owner First Name"
   type: object
-  default: "<Please Provide the Budget Amount>"
+  default: "devops"
+
+- name: customer_subscription_owner_last_name 
+  displayName: "Subscription Owner Last Name"
+  type: object
+  default: "1"
+
+
+
 
 stages:
 - stage: 'Terraform_Apply'
@@ -42,7 +50,6 @@ stages:
   jobs:
   - deployment: 'Terraform_Apply'
     pool: default
-    environment: 'testenv'  # using an ADO environment allows us to add a manual approval check
     strategy:
       runOnce:
         deploy:
@@ -55,8 +62,12 @@ stages:
               terraform init
             displayName: 'Terraform Init'
           - script: |
-              terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var customer_budget_contact_email=${{ parameters.customer_budget_contact_email}} -var budget_amount=${{ parameters.budget_amount}} -out=tfplan
+              terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
+              
             displayName: 'Terraform Plan'
           - script: |
-              terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var customer_budget_contact_email=${{ parameters.customer_budget_contact_email}} -var budget_amount=${{ parameters.budget_amount}} 
+              terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
             displayName: 'Terraform Apply'
+          - script: |
+             terraform output "customer_subscription_owner_password"
+            displayName: 'Output Password'
