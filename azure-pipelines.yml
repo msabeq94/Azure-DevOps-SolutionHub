@@ -59,13 +59,15 @@ stages:
           
           - script: |
               echo "Location: ${{ parameters.location }}"
-              echo  ${BUILD_ID}
+              
             displayName: 'Print Parameter Values'
           - script: |
-              terraform workspace new my_workspace_${BUILD_ID}
+              dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
+              echo  $dateYMD
+              terraform workspace new my_workspace_${dateYMD}
             displayName: 'Create new Terraform workspace' 
           - script: |
-              terraform workspace select my_workspace_${BUILD_ID}
+              terraform workspace select my_workspace_${dateYMD}
             displayName: 'Select the new Terraform workspace'
           - script: |
               terraform init
