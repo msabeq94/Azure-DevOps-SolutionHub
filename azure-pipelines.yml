@@ -51,6 +51,8 @@ stages:
   pool: default
   jobs:
     - job: CreateTerraformWorkspace
+      workspace:
+        shared: true
       steps:
         - script: |
             echo "Location: ${{ parameters.location }}"
@@ -62,16 +64,22 @@ stages:
 
 - stage: terraforminit
   displayName:  'terraform init'
+  dependsOn: TerraformWorkspace
   jobs:
     - job: Init
+      workspace:
+        shared: true
       steps:
         - script: |
              terraform init
 
 - stage: TerraformPlan
   displayName:  'Terraform Plan'
+  dependsOn: terraforminit
   jobs:
     - job: Plan
+      workspace:
+        shared: true
       steps:
         - script: |
             terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  -out=tfplan
@@ -79,16 +87,22 @@ stages:
 
 - stage: TerraformApply
   displayName:  'Terraform Apply'
+  dependsOn: TerraformPlan
   jobs:
     - job: Apply
+      workspace:
+        shared: true
       steps:
         - script: |
              terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  
 
 - stage: TerraformOutput
   displayName:  'Terraform Output'
+  dependsOn: TerraformApply
   jobs:
   - job: Output
+    workspace:
+      shared: true
     steps:
       - script: |
             terraform output "customer_subscription_owner_password"
