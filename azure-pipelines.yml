@@ -96,7 +96,7 @@ stages:
       - task: PublishPipelineArtifact@1
         inputs:
             targetPath: "${{parameters.default_domain_name}}.txt"
-            artifact: "${{parameters.default_domain_name} password"
+            artifact: "${{parameters.default_domain_name}"
             publishLocation: 'pipeline'
             
 
