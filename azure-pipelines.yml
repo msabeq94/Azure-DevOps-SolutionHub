@@ -61,6 +61,12 @@ stages:
               echo "Location: ${{ parameters.location }}"
             displayName: 'Print Parameter Values'
           - script: |
+              terraform workspace new my_workspace_${BUILD_ID}
+            displayName: 'Create new Terraform workspace' 
+          - script: |
+              terraform workspace select my_workspace_${BUILD_ID}
+            displayName: 'Select the new Terraform workspace'
+          - script: |
               terraform init
             displayName: 'Terraform Init'
           - script: |
