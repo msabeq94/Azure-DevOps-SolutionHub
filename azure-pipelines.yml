@@ -61,13 +61,18 @@ stages:
             terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S)  
 
             terraform output "customer_subscription_owner_password"
-            terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name }}.txt
+            terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name_pass }}.txt
+            terraform output "customer_subscription_owner_user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name_princ }}.txt
         - task: PublishPipelineArtifact@1
           inputs:
-            targetPath: "${{parameters.default_domain_name}}.txt"
-            artifact: "${{parameters.default_domain_name}}"
+            targetPath: "${{ parameters.default_domain_name_pass }}.txt"
+            artifact: "${{parameters.default_domain_name_pass}}"
             publishLocation: 'pipeline'
-            
+        - task: PublishPipelineArtifact@1
+          inputs:
+              targetPath: "${{ parameters.default_domain_name_princ }}.txt"
+              artifact: "${{ parameters.default_domain_name_princ }}"
+              publishLocation: 'pipeline' 
 - stage: savepassword
   dependsOn: TerraformRun
   jobs:
@@ -76,17 +81,24 @@ stages:
       steps:
           - task: DownloadPipelineArtifact@2
             inputs:
-              artifact: "${{parameters.default_domain_name}}"
+              artifact: "${{parameters.default_domain_name_pass}}"
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: "${{ parameters.default_domain_name_princ }}"
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'vf-cor-devops-pcr-access'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-                ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
+                ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name_pass}}.txt')
                 echo $ownerPass
+                ownerprinc=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name_princ}}.txt')
+                echo $ownerprinc
                 az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
+                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PRINC" --value "$ownerprinc"
             displayName: 'Save password to KeyVault'
+         
 
           # - script: |
               

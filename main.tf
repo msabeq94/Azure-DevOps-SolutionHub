@@ -49,6 +49,9 @@ output "customer_subscription_owner_password" {
   
 }
 
+output "user_principal_name" {
+  value = try(azuread_user.create_subscription_owner.user_principal_name,"Customer Subscription Owner not defined")
+}
 
 #https://confluence.tools.aws.vodafone.com/display/CSAR/Microsoft+Entra+ID+Tenant+and+Azure+Subscription+Deployment+Blueprint#MicrosoftEntraIDTenantandAzureSubscriptionDeploymentBlueprint-CostControlConfiguration
 /*
