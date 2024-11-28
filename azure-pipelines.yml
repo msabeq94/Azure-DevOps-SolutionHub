@@ -62,7 +62,7 @@ stages:
 
             terraform output "customer_subscription_owner_password"
             terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_pass.txt
-            terraform output "customer_subscription_owner_user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ.txt
+            terraform output "user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ.txt
         - task: PublishPipelineArtifact@1
           inputs:
             targetPath: "${{ parameters.default_domain_name}}_pass.txt"
