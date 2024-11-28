@@ -80,14 +80,29 @@ stages:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
       steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: "${{ parameters.default_domain_name}}_princ"
-              targetPath: '$(Pipeline.Workspace)'
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: "${{ parameters.default_domain_name}}_pass"
-              targetPath: '$(Pipeline.Workspace)'
+          # - task: DownloadPipelineArtifact@2
+          #   inputs:
+          #     artifact: "${{ parameters.default_domain_name}}_princ"
+          #     targetPath: '$(Pipeline.Workspace)'
+          # - task: DownloadPipelineArtifact@2
+          #   inputs:
+          #     artifact: "${{ parameters.default_domain_name}}_pass"
+          #     targetPath: '$(Pipeline.Workspace)'
+          # - task: DownloadPipelineArtifact@2
+          #   inputs:
+          #     artifact: "$(Pipeline.Workspace)"
+          #     artifactNames: |
+          #       ${{ parameters.default_domain_name }}_princ
+          #       ${{ parameters.default_domain_name }}_pass
+          #     targetPath: '$(Pipeline.Workspace)'
+          #   displayName: 'Download multiple artifacts'
+          - download: current
+            artifact: '${{ parameters.default_domain_name }}_princ'
+            displayName: 'Download artifact principal'
+          - download: current
+            artifact: '${{ parameters.default_domain_name }}_pass'
+            displayName: 'Download artifact password'
+
           - task: AzureCLI@2
             inputs:
               azureSubscription: 'vf-cor-devops-pcr-access'
