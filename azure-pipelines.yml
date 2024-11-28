@@ -126,7 +126,7 @@ stages:
   dependsOn: savepassword
   jobs:
     - job: ManualApprovalResourcesStep
-      displayName: "Review and Approve Resources Cleanup"
+      displayName: "Review and Approve EntraUser Cleanup"
       pool: server
       steps:
       - task: ManualValidation@0
@@ -135,8 +135,8 @@ stages:
           instructions: 'Please approve or reject the execution of EntraUser cleanup.'
  
 
-    - job: DownloadPrincpalID
-      displayName: "Download Princpal ID"
+    - job: CleanUpEntraUser
+      displayName: "CleanUp EntraUser"
       dependsOn: ManualApprovalResourcesStep
       steps:
           - task: DownloadPipelineArtifact@2
