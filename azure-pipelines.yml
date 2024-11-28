@@ -120,7 +120,7 @@ stages:
               artifact: "secret_princ_name"
               publishLocation: 'pipeline'
                 
-            displayName: 'Save password to KeyVault'
+            
          
 - stage: CleanUpEntraUser
   dependsOn: savepassword
@@ -136,7 +136,8 @@ stages:
  
 
     - job: DownloadPrincpalID
-      displayName: "ManualApprovalResourcesStep"
+      displayName: "Download Princpal ID"
+      dependsOn: ManualApprovalResourcesStep
       steps:
           - task: DownloadPipelineArtifact@2
             inputs:
@@ -162,6 +163,7 @@ stages:
           instructions: 'Please approve or reject the execution of KeyVault cleanup.'
     - job: CleanUpKeyVault
       displayName: "CleanUpKeyVault"
+      dependsOn: ManualApprovalResourcesStep
       steps:
           - task: DownloadPipelineArtifact@2
             inputs:
