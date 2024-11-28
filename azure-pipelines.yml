@@ -130,6 +130,7 @@ stages:
           - script: |
               ownerprinc=$(cat '$(pipeline.workspace)/${{ parameters.default_domain_name}}_princ.txt')
                echo $ownerprinc
+               az login --service-principal -u ${{ parameters.customer_client_id}} -p  ${{ parameters.customer_client_secret}} --tenant ${{ parameters.customer_tenant_id}}
               az ad user delete --id $ownerprinc
             displayName: 'Delete EntraUser'
 
