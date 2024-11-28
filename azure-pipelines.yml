@@ -67,7 +67,7 @@ stages:
           displayName: 'Publish workspace name'
            
 - stage: terraforminit
-  dependsOn: TerraformRun
+  dependsOn: TerraformWorkspace
   displayName:  'terraform init'
   jobs:
       - job: Init
