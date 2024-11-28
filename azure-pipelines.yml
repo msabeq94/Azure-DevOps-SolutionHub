@@ -104,10 +104,10 @@ stages:
                 seconds=$(date +%S)
                 secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-${seconds}" --value "$ownerPass" --query "name" --output tsv)
                 echo $secret_pass_name
-                echo secret_pass_name | sed 's/^"//;s/"$//' >  secret_pass_name.txt
+                echo $secret_pass_name | sed 's/^"//;s/"$//' >  secret_pass_name.txt
                 secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-${seconds}" --value "$ownerprinc"  --query "name" --output tsv)
-                echo $secret_princ_name
-                echo secret_princ_name | sed 's/^"//;s/"$//' >  secret_princ_name.txt
+                echo $secret_princ_name  | sed 's/^"//;s/"$//'
+                echo $secret_princ_name >  secret_princ_name.txt
 
           - task: PublishPipelineArtifact@1
             inputs:
