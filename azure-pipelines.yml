@@ -55,11 +55,13 @@ stages:
             workspace=my_workspace_${dateYMD}
             echo $dateYMD
             terraform workspace new $workspace
-            echo $workspace > "${{parameters.default_domain_name}}_${$workspace}.txt"
+            path="${{parameters.default_domain_name}}_${$workspace}.txt"
+            echo $workspace > $path
+
         - task: PublishPipelineArtifact@1
           inputs:
-            targetPath: "${{parameters.default_domain_name}}_${$workspace}.txt"
-            artifact: "${{parameters.default_domain_name}}_${$workspace}"
+            targetPath: $path
+            artifact: "${{parameters.default_domain_name}}"
             publishLocation: 'pipeline'
             
 # - stage:  
