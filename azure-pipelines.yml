@@ -42,8 +42,8 @@ parameters:
 #   default: "1"
 
 stages:
-- stage: TerraformWorkspace
-  displayName: 'Terraform Workspace'
+- stage: TerraformRun
+  displayName: 'Terraform Run'
   pool: default
   jobs:
     - job: CreateTerraformWorkspace
@@ -52,66 +52,43 @@ stages:
         - script: |
             echo "Location: ${{ parameters.location }}"
             dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
-            seconds=$(date +%S)
-            echo $seconds
             workspace=my_workspace_${dateYMD}
             echo $dateYMD
             terraform workspace new $workspace
-            echo $workspace > "${{parameters.default_domain_name}}.txt"
-          displayName: 'Create new Terraform workspace'
+            terraform init
+            # terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}} -out=tfplan
+            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S) -out=tfplan
+
+            # terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  
+            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S)  
+
+            terraform output "customer_subscription_owner_password"
+            terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name }}.txt
         - task: PublishPipelineArtifact@1
           inputs:
             targetPath: "${{parameters.default_domain_name}}.txt"
             artifact: "${{parameters.default_domain_name}}"
             publishLocation: 'pipeline'
-          displayName: 'Publish workspace name'
-           
-- stage: terraforminit
-  dependsOn: TerraformWorkspace
-  displayName:  'terraform init'
+            
+- stage: savepassword
+  dependsOn: TerraformRun
   jobs:
-      - job: Init
-        displayName: 'initialize terraform workspace'
-        steps:
-            - task: DownloadPipelineArtifact@2
-              inputs:
-                artifact: "${{parameters.default_domain_name}}"
-              displayName: 'Download workspace name'
-            - script: |
-                workspace=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
-                echo $workspace
-                terraform workspace select $workspace
-                terraform init
-            # - task: AzureCLI@2
-            #   inputs:
-            #     azureSubscription: 'vf-cor-devops-pcr-access'
-            #     scriptType: 'bash'
-            #     scriptLocation: 'inlineScript'
-            #     inlineScript: |
-            #       ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
-            #       echo $ownerPass
-            #       az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
-            #   displayName: 'Save password to KeyVault'
-# - stage:  
-# - stage: savepassword
-#   dependsOn: TerraformRun
-#   jobs:
-#     - job: SavePASSToKeyVault
-#       displayName: "Save password to KeyVault"
-#       steps:
-#           - task: DownloadPipelineArtifact@2
-#             inputs:
-#               artifact: "${{parameters.default_domain_name}}"
-#           - task: AzureCLI@2
-#             inputs:
-#               azureSubscription: 'vf-cor-devops-pcr-access'
-#               scriptType: 'bash'
-#               scriptLocation: 'inlineScript'
-#               inlineScript: |
-#                 ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
-#                 echo $ownerPass
-#                 az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
-#             displayName: 'Save password to KeyVault'
+    - job: SavePASSToKeyVault
+      displayName: "Save password to KeyVault"
+      steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifact: "${{parameters.default_domain_name}}"
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'vf-cor-devops-pcr-access'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
+                echo $ownerPass
+                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
+            displayName: 'Save password to KeyVault'
 
           # - script: |
               
