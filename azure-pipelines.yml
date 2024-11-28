@@ -36,14 +36,14 @@ parameters:
   type: string
   default: "devops"
 
-- name: customer_subscription_owner_last_name 
-  displayName: "Subscription Owner Last Name"
-  type: string
-  default: "1"
+# - name: customer_subscription_owner_last_name 
+#   displayName: "Subscription Owner Last Name"
+#   type: string
+#   default: "1"
 
 stages:
-- stage: TerraformRun
-  displayName: 'Terraform Run'
+- stage: TerraformWorkspace
+  displayName: 'Terraform Workspace'
   pool: default
   jobs:
     - job: CreateTerraformWorkspace
@@ -58,13 +58,40 @@ stages:
             echo $dateYMD
             terraform workspace new $workspace
             echo $workspace > "${{parameters.default_domain_name}}.txt"
-
+          displayName: 'Create new Terraform workspace'
         - task: PublishPipelineArtifact@1
           inputs:
             targetPath: "${{parameters.default_domain_name}}.txt"
             artifact: "${{parameters.default_domain_name}}"
             publishLocation: 'pipeline'
-            
+          displayName: 'Publish workspace name'
+           
+- stage: terraforminit
+  dependsOn: TerraformRun
+  displayName:  'terraform init'
+  jobs:
+      - job: Init
+        displayName: 'initialize terraform workspace'
+        steps:
+            - task: DownloadPipelineArtifact@2
+              inputs:
+                artifact: "${{parameters.default_domain_name}}"
+              displayName: 'Download workspace name'
+            - script: |
+                workspace=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
+                echo $workspace
+                terraform workspace select $workspace
+                terraform init
+            # - task: AzureCLI@2
+            #   inputs:
+            #     azureSubscription: 'vf-cor-devops-pcr-access'
+            #     scriptType: 'bash'
+            #     scriptLocation: 'inlineScript'
+            #     inlineScript: |
+            #       ownerPass=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}.txt')
+            #       echo $ownerPass
+            #       az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}PASS" --value "$ownerPass"
+            #   displayName: 'Save password to KeyVault'
 # - stage:  
 # - stage: savepassword
 #   dependsOn: TerraformRun
