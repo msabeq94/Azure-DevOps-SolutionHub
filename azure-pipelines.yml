@@ -184,6 +184,9 @@ stages:
                 scriptType: 'bash'
                 scriptLocation: 'inlineScript'
                 inlineScript: |
+                 echo $secret_pass_name
+                  echo $secret_princ_name
                   az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name $secret_pass_name
                   az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name $secret_princ_name
-            displayName: 'CleanUpKeyVault'
+                
+                 displayName: 'CleanUpKeyVault'
