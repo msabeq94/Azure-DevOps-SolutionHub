@@ -66,25 +66,25 @@ stages:
             terraform output "user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ.txt
             cat ${{ parameters.default_domain_name}}_princ.txt
             cat ${{ parameters.default_domain_name}}_pass.txt
-        # - task: PublishPipelineArtifact@1
-        #   inputs:
-        #     targetPath: "${{ parameters.default_domain_name}}_pass.txt"
-        #     artifact: "${{ parameters.default_domain_name}}_pass"
-        #     publishLocation: 'pipeline'
-        # - task: PublishPipelineArtifact@1
-        #   inputs:
-        #       targetPath: "${{ parameters.default_domain_name}}_princ.txt"
-        #       artifact: "${{ parameters.default_domain_name}}_princ"
-        #       publishLocation: 'pipeline' 
-        - script: |
-              mkdir $(Pipeline.Workspace)/${{ parameters.default_domain_name}}
-              cp ${{ parameters.default_domain_name}}_pass.txt $(Pipeline.Workspace)/${{ parameters.default_domain_name}}/
-              cp ${{ parameters.default_domain_name}}_princ.txt $(Pipeline.Workspace)/${{ parameters.default_domain_name}}/
         - task: PublishPipelineArtifact@1
           inputs:
-            targetPath: '$(Pipeline.Workspace)/${{ parameters.default_domain_name}}'
-            artifact: '${{ parameters.default_domain_name}}'
+            targetPath: "${{ parameters.default_domain_name}}_pass.txt"
+            artifact: "${{ parameters.default_domain_name}}_pass"
             publishLocation: 'pipeline'
+        - task: PublishPipelineArtifact@1
+          inputs:
+              targetPath: "${{ parameters.default_domain_name}}_princ.txt"
+              artifact: "${{ parameters.default_domain_name}}_princ"
+              publishLocation: 'pipeline' 
+        # - script: |
+        #       mkdir $(Pipeline.Workspace)/${{ parameters.default_domain_name}}
+        #       cp ${{ parameters.default_domain_name}}_pass.txt $(Pipeline.Workspace)/${{ parameters.default_domain_name}}/
+        #       cp ${{ parameters.default_domain_name}}_princ.txt $(Pipeline.Workspace)/${{ parameters.default_domain_name}}/
+        # - task: PublishPipelineArtifact@1
+        #   inputs:
+        #     targetPath: '$(Pipeline.Workspace)/${{ parameters.default_domain_name}}'
+        #     artifact: '${{ parameters.default_domain_name}}'
+        #     publishLocation: 'pipeline'
 - stage: savepassword
   dependsOn: TerraformRun
   jobs:
