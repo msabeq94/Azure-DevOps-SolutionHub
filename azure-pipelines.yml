@@ -67,7 +67,7 @@ stages:
         - task: PublishPipelineArtifact@1
           inputs:
             targetPath: "${{ parameters.default_domain_name}}_pass.txt"
-            artifact: "${{parameters.default_domain_name}}_pass"
+            artifact: "${{ parameters.default_domain_name}}_pass"
             publishLocation: 'pipeline'
         - task: PublishPipelineArtifact@1
           inputs:
@@ -83,10 +83,10 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifact: "${{ parameters.default_domain_name}}_princ"
-              
+
           - task: DownloadPipelineArtifact@2
             inputs:
-              artifact: "${{parameters.default_domain_name}}_pass"
+              artifact: "${{ parameters.default_domain_name}}_pass"
           
           - task: AzureCLI@2
             inputs:
