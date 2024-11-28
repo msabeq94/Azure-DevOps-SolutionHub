@@ -149,187 +149,50 @@ stages:
                az login --service-principal -u ${{ parameters.customer_client_id}} -p  ${{ parameters.customer_client_secret}} --tenant ${{ parameters.customer_tenant_id}}
               az ad user delete --id $ownerprinc
             displayName: 'Delete EntraUser'
-# - stage: CleanUpKeyVault
-#   dependsOn: savepassword
-#   jobs:
-#               - job: ManualApprovalResourcesStep
-#                 displayName: "Review and Approve Keyvault Cleanup"
-#                 pool: server
-#                 steps:
-#                   - task: ManualValidation@0
-#                     inputs:
-#                       notifyUsers: ''
-#                       instructions: 'Please approve or reject the execution of KeyVault cleanup.'
-          
-#               - job: CleanUpKeyVault
-#                 displayName: "CleanUpKeyVault"
-#                 dependsOn: ManualApprovalResourcesStep
-#                 pool: default
-#                 steps:
-#                   - task: DownloadPipelineArtifact@2
-#                     displayName: "Download secret_pass_name artifact"
-#                     inputs:
-#                       artifact: "secret_pass_name"
-#                       targetPath: '$(Pipeline.Workspace)'
-                  
-#                   - task: DownloadPipelineArtifact@2
-#                     displayName: "Download secret_princ_name artifact"
-#                     inputs:
-#                       artifact: "secret_princ_name"
-#                       targetPath: '$(Pipeline.Workspace)'
-          
-#                   - script: |
-#                       secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
-#                       echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
-#                       secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
-#                       echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
-#                     displayName: "Retrieve and Set Secrets as Variables"
-          
-#                   - task: AzureCLI@2
-#                     displayName: "Clean Up Key Vault Secrets"
-#                     inputs:
-#                       azureSubscription: 'vf-cor-devops-pcr-access'
-#                       scriptType: 'bash'
-#                       scriptLocation: 'inlineScript'
-#                       inlineScript: |
-#                         echo "Deleting secret: $(secret_pass_name)"
-#                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
-#                         echo "Deleting secret: $(secret_princ_name)"
-#                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
-# - stage: CleanUpKeyVault
-#   dependsOn: savepassword
-#   jobs:
-#     - job: ManualApprovalResourcesStep
-#       displayName: "Review and Approve Keyvault Cleanup"
-#       pool: server
-#       steps:
-#         - task: ManualValidation@0
-#           inputs:
-#             notifyUsers: ''
-#             instructions: 'Please approve or reject the execution of KeyVault cleanup.'
-          
-#     - job: CleanUpKeyVault
-#       displayName: "CleanUpKeyVault"
-#       dependsOn: ManualApprovalResourcesStep
-#       pool: default
-#       steps:
-#         - task: DownloadPipelineArtifact@2
-#           displayName: "Download secret_pass_name artifact"
-#           inputs:
-#             artifact: "secret_pass_name"
-#             targetPath: '$(Pipeline.Workspace)'
-                  
-#         - task: DownloadPipelineArtifact@2
-#           displayName: "Download secret_princ_name artifact"
-#           inputs:
-#             artifact: "secret_princ_name"
-#             targetPath: '$(Pipeline.Workspace)'
-          
-#         - script: |
-#             secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
-#             echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
-#             secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
-#             echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
-#           displayName: "Retrieve and Set Secrets as Variables"
-          
-#         - task: AzureCLI@2
-#           displayName: "Clean Up Key Vault Secrets"
-#           inputs:
-#             azureSubscription: 'vf-cor-devops-pcr-access'
-#             scriptType: 'bash'
-#             scriptLocation: 'inlineScript'
-#             inlineScript: |
-#               echo "Deleting secret: $(secret_pass_name)"
-#               az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
-#               echo "Deleting secret: $(secret_princ_name)"
-#               az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
-          
-
 - stage: CleanUpKeyVault
   dependsOn: savepassword
   jobs:
-    - job: ManualApprovalResourcesStep
-      displayName: "Review and Approve Keyvault Cleanup"
-      pool: server
-      steps:
-        - task: ManualValidation@0
-          inputs:
-            notifyUsers: ''
-            instructions: 'Please approve or reject the execution of KeyVault cleanup.'
-
-    - job: CleanUpKeyVault
-      displayName: "CleanUpKeyVault"
-      dependsOn: ManualApprovalResourcesStep
-      pool: default
-      steps:
-        - task: DownloadPipelineArtifact@2
-          displayName: "Download secret_pass_name artifact"
-          inputs:
-            artifact: "secret_pass_name"
-            targetPath: '$(Pipeline.Workspace)'
-        
-        - task: DownloadPipelineArtifact@2
-          displayName: "Download secret_princ_name artifact"
-          inputs:
-            artifact: "secret_princ_name"
-            targetPath: '$(Pipeline.Workspace)'
-
-        - script: |
-            secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
-            echo "Retrieved secret_pass_name: $secret_pass_name"
-            secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
-            echo "Retrieved secret_princ_name: $secret_princ_name"
-          displayName: "Retrieve and Display Secrets"
-
-        - task: AzureCLI@2
-          displayName: "Clean Up Key Vault Secrets"
-          inputs:
-            azureSubscription: 'vf-cor-devops-pcr-access'
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: |
-              echo "Deleting secret: $secret_pass_name"
-              az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$secret_pass_name"
-              echo "Deleting secret: $secret_princ_name"
-              az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$secret_princ_name"
-
-# # - stage: CleanUpKeyVault
-# #   dependsOn: savepassword
-# #   jobs:
-# #     - job: ManualApprovalResourcesStep
-# #       displayName: "Review and Approve Keyvault Cleanup"
-# #       pool: server
-# #       steps:
-# #       - task: ManualValidation@0
-# #         inputs:
-# #           notifyUsers: ''
-# #           instructions: 'Please approve or reject the execution of KeyVault cleanup.'
-# #     - job: CleanUpKeyVault
-# #       displayName: "CleanUpKeyVault"
-# #       dependsOn: ManualApprovalResourcesStep
-# #       steps:
-# #           - task: DownloadPipelineArtifact@2
-# #             inputs:
-# #               artifact: "secret_pass_name"
-# #               targetPath: '$(Pipeline.Workspace)'
-# #           - task: DownloadPipelineArtifact@2
-# #             inputs:
-# #               artifact: "secret_princ_name"
-# #               targetPath: '$(Pipeline.Workspace)'
-# #           - script: |
-# #               secret_pass_name=$(cat '$(pipeline.workspace)/secret_pass_name.txt')
-# #               echo $secret_pass_name
-# #               secret_princ_name=$(cat '$(pipeline.workspace)/secret_princ_name.txt')
-# #               echo $secret_princ_name
-# #           - task: AzureCLI@2
-# #             inputs:
-# #                 azureSubscription: 'vf-cor-devops-pcr-access'
-# #                 scriptType: 'bash'
-# #                 scriptLocation: 'inlineScript'
-# #                 inlineScript: |
-# #                  echo $secret_pass_name
-# #                   echo $secret_princ_name
-# #                   az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name $secret_pass_name
-# #                   az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name $secret_princ_name
-                
-# #                  displayName: 'CleanUpKeyVault'
+              - job: ManualApprovalResourcesStep
+                displayName: "Review and Approve Keyvault Cleanup"
+                pool: server
+                steps:
+                  - task: ManualValidation@0
+                    inputs:
+                      notifyUsers: ''
+                      instructions: 'Please approve or reject the execution of KeyVault cleanup.'
+          
+              - job: CleanUpKeyVault
+                displayName: "CleanUpKeyVault"
+                dependsOn: ManualApprovalResourcesStep
+                pool: default
+                steps:
+                  - task: DownloadPipelineArtifact@2
+                    displayName: "Download secret_pass_name artifact"
+                    inputs:
+                      artifact: "secret_pass_name"
+                      targetPath: '$(Pipeline.Workspace)'
+                  
+                  - task: DownloadPipelineArtifact@2
+                    displayName: "Download secret_princ_name artifact"
+                    inputs:
+                      artifact: "secret_princ_name"
+                      targetPath: '$(Pipeline.Workspace)'
+          
+                  - script: |
+                      secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
+                      echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
+                      secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
+                      echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
+                    displayName: "Retrieve and Set Secrets as Variables"
+          
+                  - task: AzureCLI@2
+                    displayName: "Clean Up Key Vault Secrets"
+                    inputs:
+                      azureSubscription: 'vf-cor-devops-pcr-access'
+                      scriptType: 'bash'
+                      scriptLocation: 'inlineScript'
+                      inlineScript: |
+                        echo "Deleting secret: $(secret_pass_name)"
+                        az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
+                        echo "Deleting secret: $(secret_princ_name)"
+                        az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
