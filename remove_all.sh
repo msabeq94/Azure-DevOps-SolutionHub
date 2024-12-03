@@ -3,7 +3,7 @@ key_vault_name="vf-core-devops-pcr-kv"
 
 # Get the list of secrets with names starting with 'mohamed'
 
-secrets=$(az keyvault secret list --vault-name "$key_vault_name" --query "[?starts_with(name, 'mohamed')].id" -o tsv)
+secrets=$(az keyvault secret list --vault-name "$key_vault_name" --query "[?starts_with(name, 'msabeq')].id" -o tsv)
 
 # Loop through each filtered secret and delete
 
