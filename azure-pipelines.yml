@@ -36,10 +36,10 @@ parameters:
   type: string
   default: "devops"
 
-# - name: customer_subscription_owner_last_name 
-#   displayName: "Subscription Owner Last Name"
-#   type: string
-#   default: "1"
+- name: customer_subscription_owner_last_name 
+  displayName: "Subscription Owner Last Name"
+  type: string
+  default: "1"
 
 stages:
 - stage: TerraformRun
@@ -56,9 +56,9 @@ stages:
             echo $dateYMD
             terraform workspace new $workspace
             terraform init
-            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%M%S%3N) -out=tfplan
+            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}} -out=tfplan
 
-            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%M%S%3N)  
+            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  
 
             terraform output "customer_subscription_owner_password"
             terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_pass.txt
@@ -122,80 +122,80 @@ stages:
                 
             
          
-- stage: CleanUpEntraUser
-  dependsOn: savepassword
-  jobs:
-    - job: ManualApprovalResourcesStep
-      displayName: "Review and Approve EntraUser Cleanup"
-      pool: server
-      steps:
-      - task: ManualValidation@0
-        inputs:
-          notifyUsers: ''
-          instructions: 'Please approve or reject the execution of EntraUser cleanup.'
+# - stage: CleanUpEntraUser
+#   dependsOn: savepassword
+#   jobs:
+#     - job: ManualApprovalResourcesStep
+#       displayName: "Review and Approve EntraUser Cleanup"
+#       pool: server
+#       steps:
+#       - task: ManualValidation@0
+#         inputs:
+#           notifyUsers: ''
+#           instructions: 'Please approve or reject the execution of EntraUser cleanup.'
  
 
-    - job: CleanUpEntraUser
-      displayName: "CleanUp EntraUser"
-      dependsOn: ManualApprovalResourcesStep
-      steps:
-          - task: DownloadPipelineArtifact@2
-            inputs:
-              artifact: "${{parameters.default_domain_name}}_princ"
-              targetPath: '$(Pipeline.Workspace)'
-          - script: |
-              ownerprinc=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}_princ.txt')
-              echo $ownerprinc
-              az login --service-principal -u ${{parameters.customer_client_id}} -p  ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}} 
-              az ad user delete --id $ownerprinc
-            displayName: 'Delete EntraUser'
-- stage: CleanUpKeyVault
-  dependsOn: savepassword
-  jobs:
-              - job: ManualApprovalResourcesStep
-                displayName: "Review and Approve Keyvault Cleanup"
-                pool: server
-                steps:
-                  - task: ManualValidation@0
-                    inputs:
-                      notifyUsers: ''
-                      instructions: 'Please approve or reject the execution of KeyVault cleanup.'
+#     - job: CleanUpEntraUser
+#       displayName: "CleanUp EntraUser"
+#       dependsOn: ManualApprovalResourcesStep
+#       steps:
+#           - task: DownloadPipelineArtifact@2
+#             inputs:
+#               artifact: "${{parameters.default_domain_name}}_princ"
+#               targetPath: '$(Pipeline.Workspace)'
+#           - script: |
+#               ownerprinc=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}_princ.txt')
+#               echo $ownerprinc
+#               az login --service-principal -u ${{parameters.customer_client_id}} -p  ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}} 
+#               az ad user delete --id $ownerprinc
+#             displayName: 'Delete EntraUser'
+# - stage: CleanUpKeyVault
+#   dependsOn: savepassword
+#   jobs:
+#               - job: ManualApprovalResourcesStep
+#                 displayName: "Review and Approve Keyvault Cleanup"
+#                 pool: server
+#                 steps:
+#                   - task: ManualValidation@0
+#                     inputs:
+#                       notifyUsers: ''
+#                       instructions: 'Please approve or reject the execution of KeyVault cleanup.'
           
-              - job: CleanUpKeyVault
-                displayName: "CleanUpKeyVault"
-                dependsOn: ManualApprovalResourcesStep
-                pool: default
-                steps:
-                  - task: DownloadPipelineArtifact@2
-                    displayName: "Download secret_pass_name artifact"
-                    inputs:
-                      artifact: "secret_pass_name"
-                      targetPath: '$(Pipeline.Workspace)'
+#               - job: CleanUpKeyVault
+#                 displayName: "CleanUpKeyVault"
+#                 dependsOn: ManualApprovalResourcesStep
+#                 pool: default
+#                 steps:
+#                   - task: DownloadPipelineArtifact@2
+#                     displayName: "Download secret_pass_name artifact"
+#                     inputs:
+#                       artifact: "secret_pass_name"
+#                       targetPath: '$(Pipeline.Workspace)'
                   
-                  - task: DownloadPipelineArtifact@2
-                    displayName: "Download secret_princ_name artifact"
-                    inputs:
-                      artifact: "secret_princ_name"
-                      targetPath: '$(Pipeline.Workspace)'
+#                   - task: DownloadPipelineArtifact@2
+#                     displayName: "Download secret_princ_name artifact"
+#                     inputs:
+#                       artifact: "secret_princ_name"
+#                       targetPath: '$(Pipeline.Workspace)'
           
-                  - script: |
-                      secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
-                      echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
-                      secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
-                      echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
-                    displayName: "Retrieve and Set Secrets as Variables"
+#                   - script: |
+#                       secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
+#                       echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
+#                       secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
+#                       echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
+#                     displayName: "Retrieve and Set Secrets as Variables"
           
-                  - task: AzureCLI@2
-                    displayName: "Clean Up Key Vault Secrets"
-                    inputs:
-                      azureSubscription: 'vf-cor-devops-pcr-access'
-                      scriptType: 'bash'
-                      scriptLocation: 'inlineScript'
-                      inlineScript: |
-                        echo "Deleting secret: $(secret_pass_name)"
-                        az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
-                        echo "Deleting secret: $(secret_princ_name)"
-                        az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
+#                   - task: AzureCLI@2
+#                     displayName: "Clean Up Key Vault Secrets"
+#                     inputs:
+#                       azureSubscription: 'vf-cor-devops-pcr-access'
+#                       scriptType: 'bash'
+#                       scriptLocation: 'inlineScript'
+#                       inlineScript: |
+#                         echo "Deleting secret: $(secret_pass_name)"
+#                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
+#                         echo "Deleting secret: $(secret_princ_name)"
+#                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
 
 
 
