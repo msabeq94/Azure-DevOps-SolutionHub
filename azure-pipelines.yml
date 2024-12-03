@@ -9,7 +9,7 @@ parameters:
 - name: customer_client_id
   displayName: "Customer Client ID"
   type: string
-  default: "d78d4e21-db81-401f-a368-032e25d575b5"
+  default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
 
 - name: customer_client_secret
   displayName: "Customer Client Secret"
