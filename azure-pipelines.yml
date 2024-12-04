@@ -44,7 +44,7 @@ parameters:
 stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
-  pool: default
+  # pool: default
   jobs:
     - job: TerraformRun
       displayName: 'Terraform Run'
@@ -79,7 +79,7 @@ stages:
               publishLocation: 'pipeline' 
 - stage: savepassword
   dependsOn: TerraformRun
-  pool: default
+  # pool: default
   jobs:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
