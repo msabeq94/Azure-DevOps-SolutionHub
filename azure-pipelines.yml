@@ -36,10 +36,10 @@ parameters:
   type: string
   default: "devops"
 
-- name: customer_subscription_owner_last_name 
-  displayName: "Subscription Owner Last Name"
-  type: string
-  default: "sh"
+# - name: customer_subscription_owner_last_name 
+#   displayName: "Subscription Owner Last Name"
+#   type: string
+#   default: "sh"
 
 stages:
 - stage: TerraformRun
@@ -56,28 +56,30 @@ stages:
             echo $dateYMD
             terraform workspace new $workspace
             terraform init
-            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}} -out=tfplan
+            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S%3N) -out=tfplan
 
-            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=${{parameters.customer_subscription_owner_last_name}}  
+            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S%3N) -out=tfplan  
 
             terraform output "customer_subscription_owner_password"
-            terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_pass.txt
+            terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_pass$s.txt
             terraform output "user_principal_name" 
-            terraform output "user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ.txt
-            cat ${{ parameters.default_domain_name}}_princ.txt
-            cat ${{ parameters.default_domain_name}}_pass.txt
+            s=$(date +%S%3N)
+            terraform output "user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ$s.txt
+            cat ${{ parameters.default_domain_name}}_princ$s.txt
+            cat ${{ parameters.default_domain_name}}_pass$s.txt
         - task: PublishPipelineArtifact@1
           inputs:
-            targetPath: "${{ parameters.default_domain_name}}_pass.txt"
+            targetPath: "${{ parameters.default_domain_name}}_pass$s.txt"
             artifact: "${{ parameters.default_domain_name}}_pass"
             publishLocation: 'pipeline'
         - task: PublishPipelineArtifact@1
           inputs:
-              targetPath: "${{ parameters.default_domain_name}}_princ.txt"
+              targetPath: "${{ parameters.default_domain_name}}_princ$s.txt"
               artifact: "${{ parameters.default_domain_name}}_princ"
               publishLocation: 'pipeline' 
 - stage: savepassword
   dependsOn: TerraformRun
+  pool: default
   jobs:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
@@ -102,10 +104,10 @@ stages:
                 ownerprinc=$(cat '$(pipeline.workspace)/${{ parameters.default_domain_name}}_princ.txt')
                 echo $ownerprinc
                 seconds=$(date +%M%S%3N)
-                secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS" --value "$ownerPass" --query "name" --output tsv)
+                secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS$(date +%S%3N)" --value "$ownerPass" --query "name" --output tsv)
                 echo $secret_pass_name
                 echo $secret_pass_name | sed 's/^"//;s/"$//' >  secret_pass_name.txt
-                secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC" --value "$ownerprinc"  --query "name" --output tsv)
+                secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC$(date +%S%3N)" --value "$ownerprinc"  --query "name" --output tsv)
                 echo $secret_princ_name  | sed 's/^"//;s/"$//'
                 echo $secret_princ_name >  secret_princ_name.txt
 
