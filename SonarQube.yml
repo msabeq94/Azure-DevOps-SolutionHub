@@ -10,20 +10,21 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
- # Checkout the repository
-- checkout: self
-  fetchDepth: 0
-- task: SonarQubePrepare@7
-  inputs:
-    SonarQube: 'SonarQube-MSabeq'
-    scannerMode: 'cli'
-    configMode: 'manual'
-    cliProjectKey: 'Solution_Hub_Solution_Hub_AZOTL4tL1j29lUBeEaYW'
-- task: SonarQubeAnalyze@7
-  displayName: 'SonarCloud Scan'
-- task: SonarQubePublish@7
-  inputs:
-    pollingTimeoutSec: '300'
+  # Checkout the repository
+  - checkout: self
+    fetchDepth: 0
 
+  - task: SonarQubePrepare@7
+    inputs:
+      SonarQube: 'SonarQube-MSabeq'
+      scannerMode: 'cli'
+      configMode: 'manual'
+      cliProjectKey: 'Solution_Hub_Solution_Hub_AZOTL4tL1j29lUBeEaYW'
 
+  - task: SonarQubeAnalyze@7
+    displayName: 'SonarCloud Scan'
+
+  - task: SonarQubePublish@7
+    inputs:
+      pollingTimeoutSec: '300'
 
