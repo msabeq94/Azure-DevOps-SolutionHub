@@ -111,16 +111,16 @@ stages:
                 echo $secret_princ_name  | sed 's/^"//;s/"$//'
                 echo $secret_princ_name >  secret_princ_name.txt
 
-          - task: PublishPipelineArtifact@1
-            inputs:
-              targetPath: "secret_pass_name.txt"
-              artifact: "secret_pass_name"
-              publishLocation: 'pipeline'
-          - task: PublishPipelineArtifact@1 
-            inputs:
-              targetPath: "secret_princ_name.txt"
-              artifact: "secret_princ_name"
-              publishLocation: 'pipeline'
+          # - task: PublishPipelineArtifact@1
+          #   inputs:
+          #     targetPath: "secret_pass_name.txt"
+          #     artifact: "secret_pass_name"
+          #     publishLocation: 'pipeline'
+          # - task: PublishPipelineArtifact@1 
+          #   inputs:
+          #     targetPath: "secret_princ_name.txt"
+          #     artifact: "secret_princ_name"
+          #     publishLocation: 'pipeline'
                 
             
          
