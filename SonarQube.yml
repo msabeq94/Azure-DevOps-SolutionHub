@@ -7,25 +7,14 @@ steps:
   # Checkout the repository
   - checkout: self
     fetchDepth: 0
-
-  # Prepare the SonarQube Analysis
   - task: SonarQubePrepare@7
     inputs:
       SonarQube: 'SonarQube-MSabeq'
       scannerMode: 'cli'
       configMode: 'manual'
       cliProjectKey: 'Solution_Hub_Solution_Hub_AZOTL4tL1j29lUBeEaYW'
-      extraProperties: |
-        # Add any additional properties here
-        sonar.projectVersion=1.0
-        sonar.sourceEncoding=UTF-8
-        sonar.sources=.
-
-  # Run the SonarQube Analysis
+      cliSources: '.'
   - task: SonarQubeAnalyze@7
-    displayName: 'SonarCloud Scan'
-
-  # Publish the SonarQube Results
   - task: SonarQubePublish@7
     inputs:
       pollingTimeoutSec: '300'
