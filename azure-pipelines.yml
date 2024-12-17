@@ -14,7 +14,7 @@ parameters:
 - name: customer_client_secret
   displayName: "Customer Client Secret"
   type: string
-  default: "IvX8Q~KXdcMvlHYIjVhyPf3VMmpQ1OYou~j0KbAK"
+  default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
   
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
@@ -39,7 +39,7 @@ parameters:
 - name: customer_subscription_owner_last_name 
   displayName: "Subscription Owner Last Name"
   type: string
-  default: Hub"
+  default: "Hub"
 
 stages:
 - stage: TerraformRun
