@@ -34,12 +34,12 @@ parameters:
 - name: customer_subscription_owner_first_name
   displayName: "Subscription Owner First Name"
   type: string
-  default: "devops"
+  default: "Solution"
 
-# - name: customer_subscription_owner_last_name 
-#   displayName: "Subscription Owner Last Name"
-#   type: string
-#   default: "sh"
+- name: customer_subscription_owner_last_name 
+  displayName: "Subscription Owner Last Name"
+  type: string
+  default: Hub"
 
 stages:
 - stage: TerraformRun
