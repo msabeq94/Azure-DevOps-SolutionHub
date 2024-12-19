@@ -84,12 +84,12 @@ stages:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
       variables:
-        owner_password: $[ dependencies.TerraformRun.outputs['TerraformRun.owner_password'] ]
-        owner_principal: $[ dependencies.TerraformRun.outputs['TerraformRun.owner_principal'] ]
+        owner_password: $[ dependencies.TerraformRun.outputs['setVariables.owner_password'] ]
+        owner_principal: $[ dependencies.TerraformRun.outputs['setVariables.owner_principal'] ]
       steps:
         - script: |
-                echo $(owner_password)
-                echo $(owner_principal)
+                echo "Owner Password: $(owner_password)"
+                 echo "Owner Principal: $(owner_principal)"
           # - task: AzureCLI@2
           #   inputs:
           #     azureSubscription: 'vf-cor-devops-pcr-access'
