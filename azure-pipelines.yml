@@ -98,19 +98,18 @@ stages:
             scriptLocation: 'inlineScript'
             inlineScript: |
               echo "Saving secrets to Key Vault..."
-              echo "User Principal Name: $(dependencies.TerraformRun.outputs['userPrincipalName'])"
-              echo "User Password: $(dependencies.TerraformRun.outputs['userPassword'])"
-              
+              echo "User Password: $(userPassword)"
+              echo "User Principal Name: $(userPrincipalName)"
               az keyvault secret set \
                 --vault-name 'vf-core-devops-pcr-kv' \
                 --name "${{ parameters.default_domain_name }}-PASS-$(date +%S%3N)" \
-                --value "$(dependencies.TerraformRun.outputs['userPassword'])" \
+                --value "$(userPassword)" \
                 --query "name" --output tsv
 
               az keyvault secret set \
                 --vault-name 'vf-core-devops-pcr-kv' \
                 --name "${{ parameters.default_domain_name }}-PRINC-$(date +%S%3N)" \
-                --value "$(dependencies.TerraformRun.outputs['userPrincipalName'])" \
+                --value "$(userPrincipalName)" \
                 --query "name" --output tsv
 
 
