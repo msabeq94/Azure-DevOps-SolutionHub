@@ -80,7 +80,7 @@ stages:
             # Extract outputs
             owner_password=$(terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//')          
             echo "Owner Password: $owner_password"
-            owner_principal=$(terraform output "customer_subscription_owner_principal" | sed 's/^"//;s/"$//')
+            owner_principal=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')
             echo "Owner Principal: $owner_principal"
             # # Set the output variables
             # echo "##vso[task.setvariable variable=owner_password;isOutput=true]$owner_password"
