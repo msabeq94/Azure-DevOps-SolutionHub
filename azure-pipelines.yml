@@ -1,6 +1,5 @@
 trigger:
 - none
-
 parameters:
 - name: location
   displayName: "Azure region"
@@ -10,19 +9,23 @@ parameters:
 - name: customer_client_id
   displayName: "Customer Client ID"
   type: string
+  default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
 
 - name: customer_client_secret
   displayName: "Customer Client Secret"
   type: string
-
+  default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
+  
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
+  default: "87431d80-c13c-4f97-8d52-4bd5ec6e617e"
 
 - name: customer_subscription_id
   displayName: "Customer Subscription ID"
   type: string
-
+  default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
+  
 - name: default_domain_name
   displayName: "Default Domain Name"
   type: string
@@ -33,6 +36,10 @@ parameters:
   type: string
   default: "Solution"
 
+# - name: customer_subscription_owner_last_name 
+#   displayName: "Subscription Owner Last Name"
+#   type: string
+#   default: "Hub4"
 stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
