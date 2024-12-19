@@ -85,23 +85,20 @@ stages:
             owner_principal=$(cat ${{ parameters.default_domain_name}}_princ.txt)
 
             # Set the output variables
-            echo "##vso[task.setvariable variable=owner_password;isOutput=true]$(cat ${{ parameters.default_domain_name}}_pass.txt)"
-            echo "##vso[task.setvariable variable=owner_principal;isOutput=true]$(cat ${{ parameters.default_domain_name}}_princ.txt)"
+            echo "##vso[task.setvariable variable=password;isOutput=true]$(cat ${{ parameters.default_domain_name}}_pass.txt)"
+            echo "##vso[task.setvariable variable=principal;isOutput=true]$(cat ${{ parameters.default_domain_name}}_princ.txt)"
           name: setVariables
 
 - stage: savepassword
   dependsOn: TerraformRun
   pool: default
-  variables:
-    # Reference outputs from TerraformRun job
-    owner_password:  $[ dependencies.TerraformRun.jobs['TerraformRun'].outputs['SetVar.owner_password'] ]
-    owner_principal: $[ dependencies.TerraformRun.jobs['TerraformRun'].outputs['SetVar.owner_principal'] ]
+  
   jobs:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
       steps:
         - script: |
-            echo "Owner Password: $(owner_password)"
-            echo "Owner Principal: $(owner_principal)"        
+            echo "Owner Password: $(setVariables.password)"
+            echo "Owner Principal: $(setVariables.principal)"        
 
           
