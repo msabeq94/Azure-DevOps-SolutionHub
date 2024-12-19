@@ -57,60 +57,53 @@ stages:
             terraform workspace new $workspace
             terraform init
 
-            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
-                           -var customer_client_id=${{ parameters.customer_client_id}} \
-                           -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
-                           -var customer_client_secret=${{ parameters.customer_client_secret }} \
-                           -var location=${{ parameters.location }} \
-                           -var domain_name=${{parameters.default_domain_name}} \
-                           -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
-                           -var customer_subscription_owner_last_name=$(date +%S%3N)
+            terraform plan \
+              -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
+              -var customer_client_id=${{ parameters.customer_client_id}} \
+              -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
+              -var customer_client_secret=${{ parameters.customer_client_secret }} \
+              -var location=${{ parameters.location }} \
+              -var domain_name=${{parameters.default_domain_name}} \
+              -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
+              -var customer_subscription_owner_last_name=$(date +%S%3N)
 
             terraform apply --auto-approve \
-                           -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
-                           -var customer_client_id=${{ parameters.customer_client_id}} \
-                           -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
-                           -var customer_client_secret=${{ parameters.customer_client_secret }} \
-                           -var location=${{ parameters.location }} \
-                           -var domain_name=${{parameters.default_domain_name}} \
-                           -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
-                           -var customer_subscription_owner_last_name=$(date +%S%3N) 
+              -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
+              -var customer_client_id=${{ parameters.customer_client_id}} \
+              -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
+              -var customer_client_secret=${{ parameters.customer_client_secret }} \
+              -var location=${{ parameters.location }} \
+              -var domain_name=${{parameters.default_domain_name}} \
+              -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
+              -var customer_subscription_owner_last_name=$(date +%S%3N) 
 
-            terraform output "customer_subscription_owner_password"
-            terraform output "user_principal_name" 
-
+            # Extract outputs
             terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_pass.txt
             terraform output "user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ.txt
-
 
             owner_password=$(cat ${{ parameters.default_domain_name}}_pass.txt)
             owner_principal=$(cat ${{ parameters.default_domain_name}}_princ.txt)
 
-            echo "owner_password=$owner_password"
-            echo "owner_principal=$owner_principal"
-
-          name: runTerraform
-
-        - script: |
             # Set the output variables
-            echo "##vso[task.setvariable variable=owner_password;isOutput=true]$(owner_password)"
-            echo "##vso[task.setvariable variable=owner_principal;isOutput=true]$(owner_principal)"
+            echo "##vso[task.setvariable variable=owner_password;isOutput=true]$owner_password"
+            echo "##vso[task.setvariable variable=owner_principal;isOutput=true]$owner_principal"
           name: setVariables
 
 - stage: savepassword
   dependsOn: TerraformRun
   pool: default
   variables:
-    owner_password: $[ dependencies.TerraformRun.outputs['TerraformRun.setVariables.owner_password'] ]
-    owner_principal: $[ dependencies.TerraformRun.outputs['TerraformRun.setVariables.owner_principal'] ]
+    # Reference outputs from TerraformRun job
+    owner_password: $[ dependencies.TerraformRun.outputs['setVariables.owner_password'] ]
+    owner_principal: $[ dependencies.TerraformRun.outputs['setVariables.owner_principal'] ]
   jobs:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
       steps:
         - script: |
             echo "Owner Password: $(owner_password)"
-            echo "Owner Principal: $(owner_principal)"          # - task: AzureCLI@2
-          #   inputs:
+            echo "Owner Principal: $(owner_principal)"        
+            
           #     azureSubscription: 'vf-cor-devops-pcr-access'
           #     scriptType: 'bash'
           #     scriptLocation: 'inlineScript'
