@@ -62,9 +62,12 @@ stages:
 
             
             user_password=$(terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//')
-            echo "##vso[task.setvariable variable=user_password]$user_password"
-            user_principal=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')  
-            echo "##vso[task.setvariable variable=user_principal]$user_principal"
+            
+            user_principal_name=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')  
+            
+
+            echo "##vso[task.setvariable variable=userPrincipalName;isOutput=true]$user_principal_name"
+            echo "##vso[task.setvariable variable=userPassword;isOutput=true]$user_password"
             
             s=$(date +%S%3N)
            
@@ -101,12 +104,12 @@ stages:
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
-               echo $(user_password)
-                echo $(user_principal)
+                echo $(userPassword)
+                echo $(userPrincipalName)
                 seconds=$(date +%M%S%3N)
-                secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-$(date +%S%3N)" --value $(user_password) --query "name" --output tsv)
+                secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-$(date +%S%3N)" --value $(userPassword) --query "name" --output tsv)
                 
-                secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-$(date +%S%3N)" --value $(user_principal)  --query "name" --output tsv)
+                secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-$(date +%S%3N)" --value $(userPrincipalName)  --query "name" --output tsv)
                
           # - task: DeleteFiles@1
             
