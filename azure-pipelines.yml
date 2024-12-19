@@ -110,6 +110,13 @@ stages:
                 echo $secret_princ_name  | sed 's/^"//;s/"$//'
                 echo $secret_princ_name >  secret_princ_name.txt
 
+          - task: DeleteFiles@1
+            inputs:
+              SourceFolder: '$(Pipeline.Workspace)'
+              Contents: |
+                ${{ parameters.default_domain_name}}_pass.txt
+                ${{ parameters.default_domain_name}}_princ.txt'  
+
           # - task: PublishPipelineArtifact@1
           #   inputs:
           #     targetPath: "secret_pass_name.txt"
