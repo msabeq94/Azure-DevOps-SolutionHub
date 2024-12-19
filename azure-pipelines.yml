@@ -35,7 +35,6 @@ parameters:
   displayName: "Subscription Owner First Name"
   type: string
   default: "devops"
-
 # - name: customer_subscription_owner_last_name 
 #   displayName: "Subscription Owner Last Name"
 #   type: string
