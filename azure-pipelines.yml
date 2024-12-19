@@ -1,5 +1,6 @@
 trigger:
 - none
+
 parameters:
 - name: location
   displayName: "Azure region"
@@ -9,23 +10,19 @@ parameters:
 - name: customer_client_id
   displayName: "Customer Client ID"
   type: string
-  default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
 
 - name: customer_client_secret
   displayName: "Customer Client Secret"
   type: string
-  default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
-  
+
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
-  default: "87431d80-c13c-4f97-8d52-4bd5ec6e617e"
 
 - name: customer_subscription_id
   displayName: "Customer Subscription ID"
   type: string
-  default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
-  
+
 - name: default_domain_name
   displayName: "Default Domain Name"
   type: string
@@ -36,176 +33,289 @@ parameters:
   type: string
   default: "Solution"
 
-# - name: customer_subscription_owner_last_name 
-#   displayName: "Subscription Owner Last Name"
-#   type: string
-#   default: "Hub4"
-
 stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
   pool: default
   jobs:
     - job: TerraformRun
-      displayName: 'Terraform Run'
+      displayName: 'Run Terraform'
       steps:
         - script: |
             echo "Location: ${{ parameters.location }}"
             dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
-            workspace=my_workspace_${dateYMD}
-            echo $dateYMD
-            terraform workspace new $workspace
+            workspace="my_workspace_${dateYMD}"
+            echo "Creating Terraform workspace: $workspace"
+            terraform workspace select $workspace || terraform workspace new $workspace
             terraform init
-            terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S%3N)
+            
+            terraform plan \
+              -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
+              -var customer_client_id=${{ parameters.customer_client_id }} \
+              -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
+              -var customer_client_secret=${{ parameters.customer_client_secret }} \
+              -var location=${{ parameters.location }} \
+              -var domain_name=${{ parameters.default_domain_name }} \
+              -var customer_subscription_owner_first_name=${{ parameters.customer_subscription_owner_first_name }} \
+              -var customer_subscription_owner_last_name=$(date +%S%3N)
+            
+            terraform apply --auto-approve \
+              -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
+              -var customer_client_id=${{ parameters.customer_client_id }} \
+              -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
+              -var customer_client_secret=${{ parameters.customer_client_secret }} \
+              -var location=${{ parameters.location }} \
+              -var domain_name=${{ parameters.default_domain_name }} \
+              -var customer_subscription_owner_first_name=${{ parameters.customer_subscription_owner_first_name }} \
+              -var customer_subscription_owner_last_name=$(date +%S%3N)
 
-            terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S%3N)
-
-            
-            user_password=$(terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//')
-            
-            user_principal_name=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')  
-            
+            user_password=$(terraform output -raw customer_subscription_owner_password)
+            user_principal_name=$(terraform output -raw user_principal_name)
 
             echo "##vso[task.setvariable variable=userPrincipalName;isOutput=true]$user_principal_name"
             echo "##vso[task.setvariable variable=userPassword;isOutput=true]$user_password"
-            
-            s=$(date +%S%3N)
-           
-            
-        # - task: PublishPipelineArtifact@1
-        #   inputs:
-        #     targetPath: "${{ parameters.default_domain_name}}_pass.txt"
-        #     artifact: "${{ parameters.default_domain_name}}_pass"
-        #     publishLocation: 'pipeline'
-        # - task: PublishPipelineArtifact@1
-        #   inputs:
-        #       targetPath: "${{ parameters.default_domain_name}}_princ.txt"
-        #       artifact: "${{ parameters.default_domain_name}}_princ"
-        #       publishLocation: 'pipeline' 
+          displayName: 'Run Terraform and Set Outputs'
+
 - stage: savepassword
   dependsOn: TerraformRun
+  displayName: 'Save Password to Key Vault'
   pool: default
   jobs:
-    - job: SavePASSToKeyVault
-      displayName: "Save password to KeyVault"
+    - job: SaveToKeyVault
+      displayName: "Save Password and Username to Key Vault"
       steps:
-          # - task: DownloadPipelineArtifact@2
-          #   inputs:
-          #     artifact: "${{ parameters.default_domain_name}}_princ"
-          #     targetPath: '$(Pipeline.Workspace)'
-          # - task: DownloadPipelineArtifact@2
-          #   inputs:
-          #     artifact: "${{ parameters.default_domain_name}}_pass"
-          #     targetPath: '$(Pipeline.Workspace)'
+        - task: AzureCLI@2
+          inputs:
+            azureSubscription: 'vf-cor-devops-pcr-access'
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              echo "Saving secrets to Key Vault..."
+              echo "User Principal Name: $(dependencies.TerraformRun.outputs['userPrincipalName'])"
+              echo "User Password: $(dependencies.TerraformRun.outputs['userPassword'])"
+              
+              az keyvault secret set \
+                --vault-name 'vf-core-devops-pcr-kv' \
+                --name "${{ parameters.default_domain_name }}-PASS-$(date +%S%3N)" \
+                --value "$(dependencies.TerraformRun.outputs['userPassword'])" \
+                --query "name" --output tsv
 
-          - task: AzureCLI@2
-            inputs:
-              azureSubscription: 'vf-cor-devops-pcr-access'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo $(userPassword)
-                echo $(userPrincipalName)
-                seconds=$(date +%M%S%3N)
-                secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-$(date +%S%3N)" --value $(userPassword) --query "name" --output tsv)
-                
-                secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-$(date +%S%3N)" --value $(userPrincipalName)  --query "name" --output tsv)
-               
-          # - task: DeleteFiles@1
+              az keyvault secret set \
+                --vault-name 'vf-core-devops-pcr-kv' \
+                --name "${{ parameters.default_domain_name }}-PRINC-$(date +%S%3N)" \
+                --value "$(dependencies.TerraformRun.outputs['userPrincipalName'])" \
+                --query "name" --output tsv
+
+
+
+# trigger:
+# - none
+# parameters:
+# - name: location
+#   displayName: "Azure region"
+#   type: string
+#   default: 'eastus'
+
+# - name: customer_client_id
+#   displayName: "Customer Client ID"
+#   type: string
+#   default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
+
+# - name: customer_client_secret
+#   displayName: "Customer Client Secret"
+#   type: string
+#   default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
+  
+# - name: customer_tenant_id
+#   displayName: "Customer Tenant ID"
+#   type: string
+#   default: "87431d80-c13c-4f97-8d52-4bd5ec6e617e"
+
+# - name: customer_subscription_id
+#   displayName: "Customer Subscription ID"
+#   type: string
+#   default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
+  
+# - name: default_domain_name
+#   displayName: "Default Domain Name"
+#   type: string
+#   default: "msabeqoutlook"
+
+# - name: customer_subscription_owner_first_name
+#   displayName: "Subscription Owner First Name"
+#   type: string
+#   default: "Solution"
+
+# # - name: customer_subscription_owner_last_name 
+# #   displayName: "Subscription Owner Last Name"
+# #   type: string
+# #   default: "Hub4"
+
+# stages:
+# - stage: TerraformRun
+#   displayName: 'Terraform Run'
+#   pool: default
+#   jobs:
+#     - job: TerraformRun
+#       displayName: 'Terraform Run'
+#       steps:
+#         - script: |
+#             echo "Location: ${{ parameters.location }}"
+#             dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
+#             workspace=my_workspace_${dateYMD}
+#             echo $dateYMD
+#             terraform workspace new $workspace
+#             terraform init
+#             terraform plan -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S%3N)
+
+#             terraform apply --auto-approve -var customer_subscription_id=${{ parameters.customer_subscription_id }} -var customer_client_id=${{ parameters.customer_client_id}} -var customer_tenant_id=${{ parameters.customer_tenant_id }} -var customer_client_secret=${{ parameters.customer_client_secret }} -var location=${{ parameters.location }} -var domain_name=${{parameters.default_domain_name}} -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} -var customer_subscription_owner_last_name=$(date +%S%3N)
+
             
-          #   inputs:
-          #     SourceFolder: '$(Pipeline.Workspace)'
-          #     Contents: |
-          #       ${{ parameters.default_domain_name}}_pass.txt
-          #       ${{ parameters.default_domain_name}}_princ.txt')
+#             user_password=$(terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//')
+            
+#             user_principal_name=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')  
+            
 
-          # - task: PublishPipelineArtifact@1
-          #   inputs:
-          #     targetPath: "secret_pass_name.txt"
-          #     artifact: "secret_pass_name"
-          #     publishLocation: 'pipeline'
-          # - task: PublishPipelineArtifact@1 
-          #   inputs:
-          #     targetPath: "secret_princ_name.txt"
-          #     artifact: "secret_princ_name"
-          #     publishLocation: 'pipeline'
+#             echo "##vso[task.setvariable variable=userPrincipalName;isOutput=true]$user_principal_name"
+#             echo "##vso[task.setvariable variable=userPassword;isOutput=true]$user_password"
+            
+#             s=$(date +%S%3N)
+           
+            
+#         # - task: PublishPipelineArtifact@1
+#         #   inputs:
+#         #     targetPath: "${{ parameters.default_domain_name}}_pass.txt"
+#         #     artifact: "${{ parameters.default_domain_name}}_pass"
+#         #     publishLocation: 'pipeline'
+#         # - task: PublishPipelineArtifact@1
+#         #   inputs:
+#         #       targetPath: "${{ parameters.default_domain_name}}_princ.txt"
+#         #       artifact: "${{ parameters.default_domain_name}}_princ"
+#         #       publishLocation: 'pipeline' 
+# - stage: savepassword
+#   dependsOn: TerraformRun
+#   pool: default
+#   jobs:
+#     - job: SavePASSToKeyVault
+#       displayName: "Save password to KeyVault"
+#       steps:
+#           # - task: DownloadPipelineArtifact@2
+#           #   inputs:
+#           #     artifact: "${{ parameters.default_domain_name}}_princ"
+#           #     targetPath: '$(Pipeline.Workspace)'
+#           # - task: DownloadPipelineArtifact@2
+#           #   inputs:
+#           #     artifact: "${{ parameters.default_domain_name}}_pass"
+#           #     targetPath: '$(Pipeline.Workspace)'
+
+#           - task: AzureCLI@2
+#             inputs:
+#               azureSubscription: 'vf-cor-devops-pcr-access'
+#               scriptType: 'bash'
+#               scriptLocation: 'inlineScript'
+#               inlineScript: |
+#                 echo $(userPassword)
+#                 echo $(userPrincipalName)
+#                 seconds=$(date +%M%S%3N)
+#                 secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-$(date +%S%3N)" --value $(userPassword) --query "name" --output tsv)
+                
+#                 secret_princ_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-$(date +%S%3N)" --value $(userPrincipalName)  --query "name" --output tsv)
+               
+#           # - task: DeleteFiles@1
+            
+#           #   inputs:
+#           #     SourceFolder: '$(Pipeline.Workspace)'
+#           #     Contents: |
+#           #       ${{ parameters.default_domain_name}}_pass.txt
+#           #       ${{ parameters.default_domain_name}}_princ.txt')
+
+#           # - task: PublishPipelineArtifact@1
+#           #   inputs:
+#           #     targetPath: "secret_pass_name.txt"
+#           #     artifact: "secret_pass_name"
+#           #     publishLocation: 'pipeline'
+#           # - task: PublishPipelineArtifact@1 
+#           #   inputs:
+#           #     targetPath: "secret_princ_name.txt"
+#           #     artifact: "secret_princ_name"
+#           #     publishLocation: 'pipeline'
                 
             
          
-# - stage: CleanUpEntraUser
-#   dependsOn: savepassword
-#   jobs:
-#     - job: ManualApprovalResourcesStep
-#       displayName: "Review and Approve EntraUser Cleanup"
-#       pool: server
-#       steps:
-#       - task: ManualValidation@0
-#         inputs:
-#           notifyUsers: ''
-#           instructions: 'Please approve or reject the execution of EntraUser cleanup.'
+# # - stage: CleanUpEntraUser
+# #   dependsOn: savepassword
+# #   jobs:
+# #     - job: ManualApprovalResourcesStep
+# #       displayName: "Review and Approve EntraUser Cleanup"
+# #       pool: server
+# #       steps:
+# #       - task: ManualValidation@0
+# #         inputs:
+# #           notifyUsers: ''
+# #           instructions: 'Please approve or reject the execution of EntraUser cleanup.'
  
 
-#     - job: CleanUpEntraUser
-#       displayName: "CleanUp EntraUser"
-#       dependsOn: ManualApprovalResourcesStep
-#       steps:
-#           - task: DownloadPipelineArtifact@2
-#             inputs:
-#               artifact: "${{parameters.default_domain_name}}_princ"
-#               targetPath: '$(Pipeline.Workspace)'
-#           - script: |
-#               ownerprinc=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}_princ.txt')
-#               echo $ownerprinc
-#               az login --service-principal -u ${{parameters.customer_client_id}} -p  ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}} 
-#               az ad user delete --id $ownerprinc
-#             displayName: 'Delete EntraUser'
-# - stage: CleanUpKeyVault
-#   dependsOn: savepassword
-#   jobs:
-#               - job: ManualApprovalResourcesStep
-#                 displayName: "Review and Approve Keyvault Cleanup"
-#                 pool: server
-#                 steps:
-#                   - task: ManualValidation@0
-#                     inputs:
-#                       notifyUsers: ''
-#                       instructions: 'Please approve or reject the execution of KeyVault cleanup.'
+# #     - job: CleanUpEntraUser
+# #       displayName: "CleanUp EntraUser"
+# #       dependsOn: ManualApprovalResourcesStep
+# #       steps:
+# #           - task: DownloadPipelineArtifact@2
+# #             inputs:
+# #               artifact: "${{parameters.default_domain_name}}_princ"
+# #               targetPath: '$(Pipeline.Workspace)'
+# #           - script: |
+# #               ownerprinc=$(cat '$(pipeline.workspace)/${{parameters.default_domain_name}}_princ.txt')
+# #               echo $ownerprinc
+# #               az login --service-principal -u ${{parameters.customer_client_id}} -p  ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}} 
+# #               az ad user delete --id $ownerprinc
+# #             displayName: 'Delete EntraUser'
+# # - stage: CleanUpKeyVault
+# #   dependsOn: savepassword
+# #   jobs:
+# #               - job: ManualApprovalResourcesStep
+# #                 displayName: "Review and Approve Keyvault Cleanup"
+# #                 pool: server
+# #                 steps:
+# #                   - task: ManualValidation@0
+# #                     inputs:
+# #                       notifyUsers: ''
+# #                       instructions: 'Please approve or reject the execution of KeyVault cleanup.'
           
-#               - job: CleanUpKeyVault
-#                 displayName: "CleanUpKeyVault"
-#                 dependsOn: ManualApprovalResourcesStep
-#                 pool: default
-#                 steps:
-#                   - task: DownloadPipelineArtifact@2
-#                     displayName: "Download secret_pass_name artifact"
-#                     inputs:
-#                       artifact: "secret_pass_name"
-#                       targetPath: '$(Pipeline.Workspace)'
+# #               - job: CleanUpKeyVault
+# #                 displayName: "CleanUpKeyVault"
+# #                 dependsOn: ManualApprovalResourcesStep
+# #                 pool: default
+# #                 steps:
+# #                   - task: DownloadPipelineArtifact@2
+# #                     displayName: "Download secret_pass_name artifact"
+# #                     inputs:
+# #                       artifact: "secret_pass_name"
+# #                       targetPath: '$(Pipeline.Workspace)'
                   
-#                   - task: DownloadPipelineArtifact@2
-#                     displayName: "Download secret_princ_name artifact"
-#                     inputs:
-#                       artifact: "secret_princ_name"
-#                       targetPath: '$(Pipeline.Workspace)'
+# #                   - task: DownloadPipelineArtifact@2
+# #                     displayName: "Download secret_princ_name artifact"
+# #                     inputs:
+# #                       artifact: "secret_princ_name"
+# #                       targetPath: '$(Pipeline.Workspace)'
           
-#                   - script: |
-#                       secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
-#                       echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
-#                       secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
-#                       echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
-#                     displayName: "Retrieve and Set Secrets as Variables"
+# #                   - script: |
+# #                       secret_pass_name=$(cat '$(Pipeline.Workspace)/secret_pass_name.txt')
+# #                       echo "##vso[task.setvariable variable=secret_pass_name]$secret_pass_name"
+# #                       secret_princ_name=$(cat '$(Pipeline.Workspace)/secret_princ_name.txt')
+# #                       echo "##vso[task.setvariable variable=secret_princ_name]$secret_princ_name"
+# #                     displayName: "Retrieve and Set Secrets as Variables"
           
-#                   - task: AzureCLI@2
-#                     displayName: "Clean Up Key Vault Secrets"
-#                     inputs:
-#                       azureSubscription: 'vf-cor-devops-pcr-access'
-#                       scriptType: 'bash'
-#                       scriptLocation: 'inlineScript'
-#                       inlineScript: |
-#                         echo "Deleting secret: $(secret_pass_name)"
-#                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
-#                         echo "Deleting secret: $(secret_princ_name)"
-#                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
+# #                   - task: AzureCLI@2
+# #                     displayName: "Clean Up Key Vault Secrets"
+# #                     inputs:
+# #                       azureSubscription: 'vf-cor-devops-pcr-access'
+# #                       scriptType: 'bash'
+# #                       scriptLocation: 'inlineScript'
+# #                       inlineScript: |
+# #                         echo "Deleting secret: $(secret_pass_name)"
+# #                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_pass_name)"
+# #                         echo "Deleting secret: $(secret_princ_name)"
+# #                         az keyvault secret delete --vault-name 'vf-core-devops-pcr-kv' --name "$(secret_princ_name)"
 
 
 
