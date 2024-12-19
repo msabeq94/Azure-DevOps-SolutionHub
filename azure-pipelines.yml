@@ -46,7 +46,7 @@ stages:
   pool: default
   jobs:
     - job: TerraformJob
-      displayName: 'Terraform Run'
+      displayName: 'Terraform Job'
       steps:
         - script: |
             echo "Location: ${{ parameters.location }}"
@@ -78,16 +78,14 @@ stages:
               -var customer_subscription_owner_last_name=$(date +%S%3N) 
 
             # Extract outputs
-            terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_pass.txt
-            terraform output "user_principal_name" | sed 's/^"//;s/"$//' > ${{ parameters.default_domain_name}}_princ.txt
-
-            owner_password=$(cat ${{ parameters.default_domain_name}}_pass.txt)
-            owner_principal=$(cat ${{ parameters.default_domain_name}}_princ.txt)
-
-            # Set the output variables
-            echo "##vso[task.setvariable variable=owner_password;isOutput=true]$owner_password"
-            echo "##vso[task.setvariable variable=owner_principal;isOutput=true]$owner_principal"
-          name: setVariables
+            owner_password=$(terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//')          
+            echo "Owner Password: $owner_password"
+            
+            
+            # # Set the output variables
+            # echo "##vso[task.setvariable variable=owner_password;isOutput=true]$owner_password"
+            # echo "##vso[task.setvariable variable=owner_principal;isOutput=true]$owner_principal"
+          
 
 - stage: savepassword
   dependsOn: TerraformRun
