@@ -110,4 +110,7 @@ stages:
             inlineScript: |
               echo "Owner Password: $(owner_password)"
               echo "Owner Principal: $(owner_principal)"
-              secret_pass_name=$(az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS$(date +%S%3N)" --value "$(owner_password)" --query "name" --output tsv)
+              
+                seconds=$(date +%S)
+                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-${seconds}" --value "$(owner_password)"
+                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-${seconds}" --value "$(owner_principal)"
