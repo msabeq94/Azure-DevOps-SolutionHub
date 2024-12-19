@@ -83,8 +83,8 @@ stages:
             owner_principal=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')
             echo "Owner Principal: $owner_principal"
             # # Set the output variables
-            # echo "##vso[task.setvariable variable=owner_password;isOutput=true]$owner_password"
-            # echo "##vso[task.setvariable variable=owner_principal;isOutput=true]$owner_principal"
+            # echo "##vso[task.setvariable variable=password;isOutput=true]$owner_password"
+            # echo "##vso[task.setvariable variable=principal;isOutput=true]$owner_principal"
           
 
 - stage: savepassword
