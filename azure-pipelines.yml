@@ -43,7 +43,7 @@ parameters:
 stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
-  pool: VMS
+  pool: 'vf-core-DevOps-agents-vms'
   jobs:
     - job: TerraformJob
       displayName: 'Terraform Job'
@@ -90,7 +90,7 @@ stages:
 
 - stage: savepassword
   dependsOn: TerraformRun
-  pool: VMS
+  pool: 'vf-core-DevOps-agents-vms'
   
   jobs:
     - job: SavePASSToKeyVault
