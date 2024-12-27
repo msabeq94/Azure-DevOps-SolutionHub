@@ -43,7 +43,7 @@ parameters:
 stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
-  pool: default
+  pool: VMS
   jobs:
     - job: TerraformJob
       displayName: 'Terraform Job'
@@ -90,7 +90,7 @@ stages:
 
 - stage: savepassword
   dependsOn: TerraformRun
-  pool: default
+  pool: VMS
   
   jobs:
     - job: SavePASSToKeyVault
