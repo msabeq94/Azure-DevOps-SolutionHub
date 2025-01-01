@@ -1,10 +1,22 @@
-provider "azurerm" {
-  features {}
-  subscription_id = var.customer_subscription_id
-  client_id = var.customer_client_id
-  client_secret = var.customer_client_secret
-  tenant_id = var.customer_tenant_id
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "2.87.0"
+    }
+  }
+  backend "azurerm" {
+    resource_group_name = "DevOps-Msabeq"
+    storage_account_name = "vfdevopspcrstatefiles"
+    container_name = "pcrtfstate"
+    key = "terraform.tfstate"
+    access_key = "G7KBcye3pWrdHT1cNQ28pwQ8GY2rL2RFkIJbXXjkVqaJcWEjYD9AEm1LbOG9/KbSIFvG1ATKhfyi+AStKL1f3A=="
+  }
 }
+
+# provider "azurerm" {
+#   features {}
+# }
 provider "azuread" {
   client_id = var.customer_client_id
   client_secret = var.customer_client_secret
