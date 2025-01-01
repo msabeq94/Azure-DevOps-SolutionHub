@@ -67,7 +67,7 @@ stages:
             #   -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
             #   -var customer_subscription_owner_last_name=$(date +%S%3N)
 
-            terraform apply --auto-approve \
+            terraform destroy --auto-approve \
               -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
               -var customer_client_id=${{ parameters.customer_client_id}} \
               -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
