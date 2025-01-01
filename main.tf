@@ -3,10 +3,10 @@ terraform {
     azurerm = {
       source = "hashicorp/azurerm"
       version = "2.87.0"
-      subscription_id = var.customer_subscription_id
-      client_id = var.customer_client_id
-      client_secret = var.customer_client_secret
-      tenant_id = var.customer_tenant_id
+      # subscription_id = var.customer_subscription_id
+      # client_id = var.customer_client_id
+      # client_secret = var.customer_client_secret
+      # tenant_id = var.customer_tenant_id
     }
   }
   backend "azurerm" {
@@ -18,9 +18,9 @@ terraform {
   }
 }
 
-# provider "azurerm" {
-#   features {}
-# }
+provider "azurerm" {
+  features {}
+}
 provider "azuread" {
   client_id = var.customer_client_id
   client_secret = var.customer_client_secret
