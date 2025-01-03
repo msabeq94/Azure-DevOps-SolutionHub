@@ -147,7 +147,7 @@ stages:
 # #               echo "$Rprovider registered."
 # #             done
   - job: ManualApprovalResourcesStep
-    dependsOn: InitializingProviders
+    # dependsOn: InitializingProviders
     condition: eq(variables.Action, 'destroy -auto-approve')
     displayName: "Review and Approve Resources Cleanup"
     pool: server 
