@@ -126,7 +126,7 @@ stages:
       steps:
         - script: |
             # cd cmdb/customer
-            sed -i "s/tfstate/${{ parameters.customer_domain_name }}/g" main.tf
+            sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
             cat main.tf
             terraform workspace select ${{parameters.customer_domain_name}} || terraform workspace new ${{parameters.customer_domain_name}} 
             terraform init
