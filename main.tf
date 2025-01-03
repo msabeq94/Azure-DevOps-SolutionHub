@@ -14,7 +14,7 @@ terraform {
     storage_account_name = "vfdevopspcrstatefiles"
     container_name = "pcrtfstate"
     key = "cststate.tfstate"
-    access_key = "G7KBcye3pWrdHT1cNQ28pwQ8GY2rL2RFkIJbXXjkVqaJcWEjYD9AEm1LbOG9/KbSIFvG1ATKhfyi+AStKL1f3A=="
+    access_key = "StorageAccountKey"
   }
 }
 

@@ -1,47 +1,9 @@
-parameters:
-- name: Action
-  displayName: Action
-  type: string
-  default: 'apply -auto-approve'
-  values:
-    - 'plan'
-    - 'apply -auto-approve'
-    - 'destroy -auto-approve'
-description: Action to perform
+- task: AzureKeyVault@1
+  inputs:
+    ConnectedServiceName: '<Service Connection Name>'
+    KeyVaultName: '<Your Key Vault Name>'
+    SecretsFilter: '<Secret Name>'
+    RunAsPreJob: true
 
-- name: country_code
-  displayName: country_code
-  type: string
-  default: 'eastus'
-  values:
-    - 'GB-Commercial'
-    - 'GB-Official'
-    - 'IT-Commercial'
-    - 'IE-Commercial'
-    - 'ES-Commercial'
-    - 'PT-Commercial'
-    - 'AL-Commercial'
-  description: Provide the regional tooling account
-
-
-
-  registerProvidersResponse="yes"  # Replace this with the actual response variable
-
-if [ -z "$registerProvidersResponse" ] || [ "$registerProvidersResponse" = "yes" ] || [ "$registerProvidersResponse" = "y" ]; then
-    
-
-    for Rprovider in "${Rproviders[@]}"; do
-        az provider register --namespace $Rprovider
-    done
-
-    for Rprovider in "${Rproviders[@]}"; do
-        RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
-
-        while [ "$RegistrationState" != "Registered" ]; do
-            sleep 5
-            RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
-        done
-
-        echo "$Rprovider registered."
-    done
-fi
+- script: echo $(<Variable Name>)
+  displayName: 'Use the secret'
