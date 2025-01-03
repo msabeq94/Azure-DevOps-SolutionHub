@@ -127,16 +127,8 @@ stages:
   condition: always()
   pool: 'DevOps-Agents-VMS'
   jobs:
-  - job: Statetf
-    displayName: 'State file key'
-    pool: 'DevOps-Agents-VMS'
-    steps:
-      - task: AzureKeyVault@1
-        inputs:
-          azureSubscription: 'vf-cor-devops-pcr-access'
-          KeyVaultName: 'vf-core-devops-pcr-kv'
-          SecretsFilter: 'terraform-backend-key'
-          RunAsPreJob: true
+
+     
 #   - job: 'InitializingProviders'
 #     condition: eq(variables.Action, 'apply -auto-approve')
 #     displayName: 'Initializing Providers'
@@ -170,9 +162,15 @@ stages:
   - job: TerraformJob
     condition: always()   
     displayName: 'Terraform Job'
-    dependsOn: Statetf
+    dependsOn: 
     steps:
-      - script: |
+    - task: AzureKeyVault@1
+      inputs:
+        azureSubscription: 'vf-cor-devops-pcr-access'
+        KeyVaultName: 'vf-core-devops-pcr-kv'
+        SecretsFilter: 'terraform-backend-key'
+        RunAsPreJob: true
+    - script: |
             # cd cmdb/customer
             sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
             sed -i "s/StorageAccountKey/$(terraform-backend-key)/g" main.tf
