@@ -168,14 +168,14 @@ stages:
       inputs:
         azureSubscription: 'vf-cor-devops-pcr-access'
         KeyVaultName: 'vf-core-devops-pcr-kv'
-        SecretsFilter: 'terraform-backend-key'
+        SecretsFilter: 'terraformbackendkey'
         RunAsPreJob: true
     - script: |
             # cd cmdb/customer
             sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
-            echo "Storage Account Key: $(terraform-backend-key)"
+            echo "Storage Account Key: $(terraformbackendkey)"
             
-            sed -i "s/StorageAccountKey/$(terraform-backend-key)/g" main.tf
+            sed -i "s/StorageAccountKey/$(terraformbackendkey)/g" main.tf
             cat main.tf
             
             terraform init
