@@ -177,7 +177,7 @@ stages:
             echo "Storage Account Key: $(terraformbackendkey)"
             
             
-            escaped_key=$(echo ${terraformbackendkey} 
+            escaped_key=$(echo ${terraformbackendkey} | sed -e 's/[&/\]/\\&/g' -e 's/=/\\=/g' -e 's/+//g')
             
             echo "Escaped Key: $escaped_key"
 
