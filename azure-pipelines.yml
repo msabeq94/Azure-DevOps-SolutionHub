@@ -163,7 +163,7 @@ stages:
     condition: |
       or(
         succeeded('ManualApprovalResourcesStep'),
-        skipped('ManualApprovalResourcesStep')
+        not(failed('ManualApprovalResourcesStep'))
       )   
     displayName: 'Terraform Job'
     dependsOn: ManualApprovalResourcesStep 
