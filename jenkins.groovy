@@ -51,29 +51,29 @@ pipeline{
                 ])
             }
         }
-	    stage ("Intializing Providers"){
-		steps{
-		    sh '''
-			set +x
-                        az login --service-principal -u ${customer_client_id} -p ${customer_client_secret} --tenant ${customer_tenant_id}
-                        set -x
-                        az account set -s ${customer_subscription_id}
-                        az provider register --namespace 'Microsoft.KeyVault'
-			az provider register --namespace 'Microsoft.Network'
-			az provider register --namespace 'Microsoft.Advisor'
-			az provider register --namespace 'Microsoft.Storage'
-			az provider register --namespace 'Microsoft.OperationalInsights'
-			az provider register --namespace 'Microsoft.PolicyInsights'
-			az provider register --namespace 'Microsoft.Kusto'
-			az provider register --namespace 'Microsoft.ManagedIdentity'
-			az provider register --namespace 'Microsoft.Security'
-			az provider register --namespace 'Microsoft.ADHybridHealthService'
-			az provider register --namespace 'Microsoft.Insights'
-			az provider register --namespace 'Microsoft.Authorization'
-			sleep 30
-		    '''
-		    }
-	    }
+	    // stage ("Intializing Providers"){
+		// steps{
+		//     sh '''
+		// 	set +x
+        //                 az login --service-principal -u ${customer_client_id} -p ${customer_client_secret} --tenant ${customer_tenant_id}
+        //                 set -x
+        //                 az account set -s ${customer_subscription_id}
+        //                 az provider register --namespace 'Microsoft.KeyVault'
+		// 	az provider register --namespace 'Microsoft.Network'
+		// 	az provider register --namespace 'Microsoft.Advisor'
+		// 	az provider register --namespace 'Microsoft.Storage'
+		// 	az provider register --namespace 'Microsoft.OperationalInsights'
+		// 	az provider register --namespace 'Microsoft.PolicyInsights'
+		// 	az provider register --namespace 'Microsoft.Kusto'
+		// 	az provider register --namespace 'Microsoft.ManagedIdentity'
+		// 	az provider register --namespace 'Microsoft.Security'
+		// 	az provider register --namespace 'Microsoft.ADHybridHealthService'
+		// 	az provider register --namespace 'Microsoft.Insights'
+		// 	az provider register --namespace 'Microsoft.Authorization'
+		// 	sleep 30
+		//     '''
+		//     }
+	    // }
         stage ('Configure Customer Account') {
             steps{
                 sh '''

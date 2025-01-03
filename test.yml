@@ -22,3 +22,26 @@ description: Action to perform
     - 'PT-Commercial'
     - 'AL-Commercial'
   description: Provide the regional tooling account
+
+
+
+  registerProvidersResponse="yes"  # Replace this with the actual response variable
+
+if [ -z "$registerProvidersResponse" ] || [ "$registerProvidersResponse" = "yes" ] || [ "$registerProvidersResponse" = "y" ]; then
+    
+
+    for Rprovider in "${Rproviders[@]}"; do
+        az provider register --namespace $Rprovider
+    done
+
+    for Rprovider in "${Rproviders[@]}"; do
+        RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
+
+        while [ "$RegistrationState" != "Registered" ]; do
+            sleep 5
+            RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
+        done
+
+        echo "$Rprovider registered."
+    done
+fi

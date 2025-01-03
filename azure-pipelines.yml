@@ -82,8 +82,34 @@ parameters:
   displayName: "Customer Client Secret"
   type: string
   default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
-
+- name: customer_subscription_owner_first_name
+  displayName: "Subscription Owner First Name"
+  type: string
+  default: "devops"
 stages:
+- stage: Intializing Providers
+  displayName: 'Initializing Providers'
+  jobs:
+    - job: 'InitializingProviders'
+      displayName: 'Initializing Providers'
+      pool: 'DevOps-Agents-VMS'
+      steps:
+        - script: |
+            az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+            az account set -s ${{parameters.customer_subscription_id}}
+            Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
+            for Rprovider in "${Rproviders[@]}"; do
+              az provider register --namespace $Rprovider
+            done
+            for Rprovider in "${Rproviders[@]}"; do
+              RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
+              while [ "$RegistrationState" != "Registered" ]; do
+                sleep 5
+                RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
+              done
+              echo "$Rprovider registered."
+            done
+   
 - stage: TerraformRun
   displayName: 'Terraform Run'
   pool: 'DevOps-Agents-VMS'
@@ -92,15 +118,13 @@ stages:
       displayName: 'Terraform Job'
       steps:
         - script: |
-            echo "Location: ${{ parameters.location }}"
-            dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
-            workspace=my_workspace_${dateYMD}
-            echo $dateYMD
-
-            terraform workspace new $workspace
+            # cd cmdb/customer
+            sed -i "s/tfstate/${{ parameters.customer_domain_name }}/g" main.tf
             terraform init
-
-            terraform destroy --auto-approve \
+            terraform workspace select ${{parameters.customer_domain_name}} || terraform workspace new ${{parameters.customer_domain_name}}
+            dateYMD=$(date +%Y%m%dT%H%M%S%NZ)
+          
+            terraform  ${{ parameters.Action }} \
               -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
               -var customer_client_id=${{ parameters.customer_client_id }} \
               -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
@@ -110,39 +134,39 @@ stages:
               -var customer_subscription_owner_first_name=${{ parameters.customer_subscription_owner_first_name }} \
               -var customer_subscription_owner_last_name=$(date +%S%3N)
 
-            # Extract outputs
-            owner_password=$(terraform output -raw "customer_subscription_owner_password")
-            echo "Owner Password: $owner_password"
-            owner_principal=$(terraform output -raw "user_principal_name")
-            echo "Owner Principal: $owner_principal"
+            # # Extract outputs
+            # owner_password=$(terraform output -raw "customer_subscription_owner_password")
+            # echo "Owner Password: $owner_password"
+            # owner_principal=$(terraform output -raw "user_principal_name")
+            # echo "Owner Principal: $owner_principal"
 
-            # Set the output variables
-            echo "##vso[task.setvariable variable=password;isOutput=true]$owner_password"
-            echo "##vso[task.setvariable variable=principal;isOutput=true]$owner_principal"
-          name: setVariables
+            # # Set the output variables
+            # echo "##vso[task.setvariable variable=password;isOutput=true]$owner_password"
+            # echo "##vso[task.setvariable variable=principal;isOutput=true]$owner_principal"
+          
 
-- stage: savepassword
-  dependsOn: TerraformRun
-  pool: 'DevOps-Agents-VMS'
-  jobs:
-    - job: SavePASSToKeyVault
-      displayName: "Save password to KeyVault"
-      variables:
-        owner_password: $[ stageDependencies.TerraformRun.TerraformJob.outputs['setVariables.password'] ]
-        owner_principal: $[ stageDependencies.TerraformRun.TerraformJob.outputs['setVariables.principal'] ]
-      steps:
-        - script: |
-            echo "Owner Password: $(owner_password)"
-            echo "Owner Principal: $(owner_principal)"
-        - task: AzureCLI@2
-          inputs:
-            azureSubscription: 'vf-cor-devops-pcr-access'
-            scriptType: 'bash'
-            scriptLocation: 'inlineScript'
-            inlineScript: |
-              echo "Owner Password: $(owner_password)"
-              echo "Owner Principal: $(owner_principal)"
+# - stage: savepassword
+#   dependsOn: TerraformRun
+#   pool: 'DevOps-Agents-VMS'
+#   jobs:
+#     - job: SavePASSToKeyVault
+#       displayName: "Save password to KeyVault"
+#       variables:
+#         owner_password: $[ stageDependencies.TerraformRun.TerraformJob.outputs['setVariables.password'] ]
+#         owner_principal: $[ stageDependencies.TerraformRun.TerraformJob.outputs['setVariables.principal'] ]
+#       steps:
+#         - script: |
+#             echo "Owner Password: $(owner_password)"
+#             echo "Owner Principal: $(owner_principal)"
+#         - task: AzureCLI@2
+#           inputs:
+#             azureSubscription: 'vf-cor-devops-pcr-access'
+#             scriptType: 'bash'
+#             scriptLocation: 'inlineScript'
+#             inlineScript: |
+#               echo "Owner Password: $(owner_password)"
+#               echo "Owner Principal: $(owner_principal)"
 
-              seconds=$(date +%S)
-              az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PASS-${seconds}" --value "$(owner_password)"
-              az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PRINC-${seconds}" --value "$(owner_principal)"
+#               seconds=$(date +%S)
+#               az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PASS-${seconds}" --value "$(owner_password)"
+#               az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PRINC-${seconds}" --value "$(owner_principal)"
