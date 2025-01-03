@@ -201,8 +201,8 @@ stages:
             # # Set the output variables
             # echo "##vso[task.setvariable variable=password;isOutput=true]$owner_password"
             # echo "##vso[task.setvariable variable=principal;isOutput=true]$owner_principal"
-      env:
-            terraformbackendkey: $(terraformbackendkey)
+      # env:
+      #       terraformbackendkey: $(terraformbackendkey)
 # - stage: savepassword
 #   dependsOn: TerraformRun
 #   pool: 'DevOps-Agents-VMS'
