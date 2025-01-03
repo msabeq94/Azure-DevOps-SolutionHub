@@ -29,19 +29,19 @@ parameters:
 - name: customer_subscription_owner_firstname
   displayName: "Customer Subscription Owner First Name"
   type: string
-  default: ''
+  default: " "
 - name: customer_subscription_owner_lastname
   displayName: "Customer Subscription Owner Last Name"
   type: string
-  default: ''
+  default: " "
 - name: ustomer_subscription_contributor_firstname
   displayName: "Customer Subscription Contributor First Name"
   type: string
-  default: ''
+  default: " "
 - name: customer_subscription_contributor_lastname
   displayName: "Customer Subscription Contributor Last Name"
   type: string
-  default: ''
+  default: " "
 - name: customer_security_contact_email
   displayName: "Customer Security Contact Email"
   type: string
@@ -61,11 +61,11 @@ parameters:
 - name: vodafone_support_primary_L2_username
   displayName: "Vodafone Support Primary L2 Username"
   type: string
-  default: ''
+  default: " "
 - name: vodafone_support_primary_L2_useremail
   displayName: "Vodafone Support Primary L2 User Email"
   type: string
-  default: ''
+  default: ""
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
