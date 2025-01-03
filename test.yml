@@ -7,3 +7,6 @@
 
 - script: echo $(<Variable Name>)
   displayName: 'Use the secret'
+
+
+escaped_key=$(echo ${terraformbackendkey} | sed -e 's/[&/\]/\\&/g' -e 's/=/\\=/g' -e 's/+//g')

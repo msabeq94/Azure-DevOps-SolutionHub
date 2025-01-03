@@ -178,10 +178,10 @@ stages:
             
             
             escaped_key=$(echo ${terraformbackendkey} 
-            #| sed -e 's/[&/\]/\\&/g' -e 's/=/\\=/g' -e 's/+//g')
+            
             echo "Escaped Key: $escaped_key"
 
-            sed -i "s/StorageAccountKey/${escaped_key}/g" main.tf
+            sed -i "s.StorageAccountKey.${escaped_key}.g" main.tf
             cat main.tf
             
             terraform init -reconfigure
