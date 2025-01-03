@@ -57,7 +57,7 @@ parameters:
 - name: budgeted_amount
   displayName: "Budgeted Amount"
   type: number
-  default: ""
+  default: "0"
 - name: vodafone_support_primary_L2_username
   displayName: "Vodafone Support Primary L2 Username"
   type: string
