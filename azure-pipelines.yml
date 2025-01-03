@@ -160,9 +160,13 @@ stages:
           notifyUsers: ""
           instructions: "Are you sure, you want to delete the configuration?"
   - job: TerraformJob
-    condition: always()   
+    condition: |
+      or(
+        succeeded('ManualApprovalResourcesStep'),
+        skipped('ManualApprovalResourcesStep')
+      )   
     displayName: 'Terraform Job'
-    dependsOn: 
+    dependsOn: ManualApprovalResourcesStep 
     steps:
     - task: AzureKeyVault@2
       inputs:
