@@ -42,18 +42,18 @@ parameters:
   displayName: "Customer Subscription Contributor Last Name"
   type: string
   default: " "
-- name: customer_security_contact_email
-  displayName: "Customer Security Contact Email"
-  type: string
-  default: ""
-- name: customer_service_health_contact_email
-  displayName: "Customer Service Health Contact Email"
-  type: string
-  default: ""
-- name: customer_budget_contact_email
-  displayName: "Customer Budget Contact Email"
-  type: string
-  default: ""
+# - name: customer_security_contact_email
+#   displayName: "Customer Security Contact Email"
+#   type: string
+#   default: ""
+# - name: customer_service_health_contact_email
+#   displayName: "Customer Service Health Contact Email"
+#   type: string
+#   default: ""
+# - name: customer_budget_contact_email
+#   displayName: "Customer Budget Contact Email"
+#   type: string
+#   default: ""
 - name: budgeted_amount
   displayName: "Budgeted Amount"
   type: number
@@ -175,7 +175,11 @@ stages:
             sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
             echo "Storage Account Key: $(terraformbackendkey)"
             
-            sed -i "s/StorageAccountKey/${terraformbackendkey}/g" main.tf
+            
+            escaped_key=$(echo ${terraformbackendkey} | sed -e 's/[&/\]/\\&/g' -e 's/=/\\=/g' -e 's/+//g')
+            echo "Escaped Key: $escaped_key"
+
+            sed -i "s/StorageAccountKey/${escaped_key}/g" main.tf
             cat main.tf
             
             terraform init
@@ -201,8 +205,8 @@ stages:
             # # Set the output variables
             # echo "##vso[task.setvariable variable=password;isOutput=true]$owner_password"
             # echo "##vso[task.setvariable variable=principal;isOutput=true]$owner_principal"
-      # env:
-      #       terraformbackendkey: $(terraformbackendkey)
+      env:
+            terraformbackendkey: $(terraformbackendkey)
 # - stage: savepassword
 #   dependsOn: TerraformRun
 #   pool: 'DevOps-Agents-VMS'
