@@ -92,10 +92,12 @@ parameters:
   type: string
   default: 'eastus'
 
+variables:
+  action: ${{ parameters.Action }}
 
 stages:
 - stage: IntializingProviders
-  condition: eq(parameters.Action, 'apply -auto-approve')
+  condition: eq(variables.Action, 'apply -auto-approve')
   displayName: 'Initializing Providers'
   jobs:
     - job: 'InitializingProviders'
@@ -124,7 +126,7 @@ stages:
   pool: 'DevOps-Agents-VMS'
   jobs:
   - job: ManualApprovalResourcesStep
-    condition: eq(parameters.Action, 'destroy -auto-approve')
+    condition: eq(variables.Action, 'destroy -auto-approve')
     displayName: "Review and Approve Resources Cleanup"
     pool: server 
     steps:
