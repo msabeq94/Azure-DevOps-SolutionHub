@@ -175,7 +175,7 @@ stages:
             sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
             echo "Storage Account Key: $(terraformbackendkey)"
             
-            sed -i "s/StorageAccountKey/$(terraformbackendkey)/g" main.tf
+            sed -i "s/StorageAccountKey/${terraformbackendkey}/g" main.tf
             cat main.tf
             
             terraform init
