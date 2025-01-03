@@ -164,7 +164,7 @@ stages:
     displayName: 'Terraform Job'
     dependsOn: 
     steps:
-    - task: AzureKeyVault@1
+    - task: AzureKeyVault@2
       inputs:
         azureSubscription: 'vf-cor-devops-pcr-access'
         KeyVaultName: 'vf-core-devops-pcr-kv'
