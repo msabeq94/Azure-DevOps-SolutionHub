@@ -159,7 +159,7 @@ stages:
   - job: TerraformJob
     condition: always()   
     displayName: 'Terraform Job'
-    dependsOn: ManualApprovalResourcesStep
+    dependsOn: 
     steps:
       - script: |
             # cd cmdb/customer
