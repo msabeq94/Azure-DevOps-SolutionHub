@@ -96,22 +96,49 @@ variables:
   action: ${{ parameters.Action }}
 
 stages:
-- stage: IntializingProviders
-  condition: eq(variables.Action, 'apply -auto-approve')
-  displayName: 'Initializing Providers'
+# - stage: IntializingProviders
+#   condition: eq(variables.Action, 'apply -auto-approve')
+#   displayName: 'Initializing Providers'
+#   jobs:
+#     - job: 'InitializingProviders'
+#       displayName: 'Initializing Providers'
+#       pool: 'DevOps-Agents-VMS'
+#       steps:
+#         - script: |
+#             echo "Initializing Providers" 
+#             # az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+#             # az account set -s ${{parameters.customer_subscription_id}}
+#             # Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
+#             # for Rprovider in "${Rproviders[@]}"; do
+#             #   az provider register --namespace $Rprovider
+#             # done
+# #             for Rprovider in "${Rproviders[@]}"; do
+# #               RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
+# #               while [ "$RegistrationState" != "Registered" ]; do
+# #                 sleep 5
+# #                 RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
+# #               done
+# #               echo "$Rprovider registered."
+# #             done
+   
+- stage: TerraformRun
+  dependsOn: IntializingProviders
+  displayName: 'Terraform Run'
+  pool: 'DevOps-Agents-VMS'
   jobs:
-    - job: 'InitializingProviders'
-      displayName: 'Initializing Providers'
-      pool: 'DevOps-Agents-VMS'
-      steps:
-        - script: |
-            echo "Initializing Providers" 
-            # az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
-            # az account set -s ${{parameters.customer_subscription_id}}
-            # Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
-            # for Rprovider in "${Rproviders[@]}"; do
-            #   az provider register --namespace $Rprovider
-            # done
+  - job: 'InitializingProviders'
+    condition: eq(variables.Action, 'apply -auto-approve')
+    displayName: 'Initializing Providers'
+    pool: 'DevOps-Agents-VMS'
+    steps:
+      - script: |
+          echo "Initializing Providers" 
+          # az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+          # az account set -s ${{parameters.customer_subscription_id}}
+          # Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
+          # for Rprovider in "${Rproviders[@]}"; do
+          #   az provider register --namespace $Rprovider
+          # done
 #             for Rprovider in "${Rproviders[@]}"; do
 #               RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
 #               while [ "$RegistrationState" != "Registered" ]; do
@@ -120,13 +147,8 @@ stages:
 #               done
 #               echo "$Rprovider registered."
 #             done
-   
-- stage: TerraformRun
-  dependsOn: IntializingProviders
-  displayName: 'Terraform Run'
-  pool: 'DevOps-Agents-VMS'
-  jobs:
   - job: ManualApprovalResourcesStep
+    dependsOn: InitializingProviders
     condition: eq(variables.Action, 'destroy -auto-approve')
     displayName: "Review and Approve Resources Cleanup"
     pool: server 
@@ -137,6 +159,7 @@ stages:
           instructions: "Are you sure, you want to delete the configuration?"
   - job: TerraformJob
     displayName: 'Terraform Job'
+    dependsOn: ManualApprovalResourcesStep
     steps:
       - script: |
             # cd cmdb/customer
