@@ -94,20 +94,21 @@ parameters:
 
 
 stages:
-# - stage: IntializingProviders
-#   displayName: 'Initializing Providers'
-#   jobs:
-#     - job: 'InitializingProviders'
-#       displayName: 'Initializing Providers'
-#       pool: 'DevOps-Agents-VMS'
-#       steps:
-#         - script: |
-#             az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
-#             az account set -s ${{parameters.customer_subscription_id}}
-#             Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
-#             for Rprovider in "${Rproviders[@]}"; do
-#               az provider register --namespace $Rprovider
-#             done
+- stage: IntializingProviders
+  condition: eq(parameters.Action, 'apply -auto-approve')
+  displayName: 'Initializing Providers'
+  jobs:
+    - job: 'InitializingProviders'
+      displayName: 'Initializing Providers'
+      pool: 'DevOps-Agents-VMS'
+      steps:
+        - script: |
+            az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+            az account set -s ${{parameters.customer_subscription_id}}
+            Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
+            for Rprovider in "${Rproviders[@]}"; do
+              az provider register --namespace $Rprovider
+            done
 #             for Rprovider in "${Rproviders[@]}"; do
 #               RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
 #               while [ "$RegistrationState" != "Registered" ]; do
@@ -118,13 +119,23 @@ stages:
 #             done
    
 - stage: TerraformRun
+  dependsOn: IntializingProviders
   displayName: 'Terraform Run'
   pool: 'DevOps-Agents-VMS'
   jobs:
-    - job: TerraformJob
-      displayName: 'Terraform Job'
-      steps:
-        - script: |
+  - job: ManualApprovalResourcesStep
+    condition: eq(parameters.Action, 'destroy -auto-approve')
+    displayName: "Review and Approve Resources Cleanup"
+    pool: server 
+    steps:
+      - task: ManualValidation@0
+        inputs:
+          notifyUsers: ""
+          instructions: "Are you sure, you want to delete the configuration?"
+  - job: TerraformJob
+    displayName: 'Terraform Job'
+    steps:
+      - script: |
             # cd cmdb/customer
             sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
             cat main.tf
