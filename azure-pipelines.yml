@@ -5,7 +5,7 @@ parameters:
 - name: Action
   displayName: Action
   type: string
-  default: 'apply -auto-approve'
+  default: 'plan'
   values:
     - 'plan'
     - 'apply -auto-approve'
