@@ -167,12 +167,12 @@ stages:
             terraform init
             terraform workspace select ${{parameters.customer_domain_name}} || terraform workspace new ${{parameters.customer_domain_name}} 
             
-            terraform  ${{ parameters.Action }} \
+            terraform ${{ parameters.Action }} \
               -var country_code=${{ parameters.country_code }} \
               -var company_name=${{ parameters.customer_domain_name }} \
-              -var customer_subscription_owner_firstname =${{ parameters.customer_subscription_owner_firstname}} \
-              -var customer_subscription_owner_lastname =${{ parameters.customer_subscription_owner_lastname }} \
-              -var customer_security_contact_email =${{ parameters.customer_security_contact_email }} \
+              -var customer_subscription_owner_firstname=${{ parameters.customer_subscription_owner_firstname }} \
+              -var customer_subscription_owner_lastname=${{ parameters.customer_subscription_owner_lastname }} \
+              -var customer_security_contact_email=${{ parameters.customer_security_contact_email }} \
               -var customer_service_health_contact_email=${{ parameters.customer_service_health_contact_email }} \
               -var customer_budget_contact_email=${{ parameters.customer_budget_contact_email }} \
               -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
@@ -181,8 +181,8 @@ stages:
               -var customer_client_secret=${{ parameters.customer_client_secret }} \
               -var budget_amount=${{ parameters.budgeted_amount }} \
               -var vodafone_support_primary_L2_username=${{ parameters.vodafone_support_primary_L2_username }} \
-              -var vodafone_support_primary_L2_useremail =${{ parameters.vodafone_support_primary_L2_useremail }} \
+              -var vodafone_support_primary_L2_useremail=${{ parameters.vodafone_support_primary_L2_useremail }} \
               -var customer_subscription_contributor_firstname=${{ parameters.customer_subscription_contributor_firstname }} \
-              -var customer_subscription_contributor_lastname=${{ parameters.customer_subscription_contributor_lastname }} 
+              -var customer_subscription_contributor_lastname=${{ parameters.customer_subscription_contributor_lastname }}
       env:
             terraformbackendkey: $(terraformbackendkey)
