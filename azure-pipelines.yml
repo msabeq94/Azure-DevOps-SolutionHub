@@ -124,6 +124,7 @@ stages:
 - stage: TerraformRun
   displayName: 'Terraform Run'
   dependsOn: IntializingProviders
+  condition: always()
   pool: 'DevOps-Agents-VMS'
   jobs:
 #   - job: 'InitializingProviders'
