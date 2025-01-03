@@ -179,7 +179,7 @@ stages:
               -var customer_client_id=${{ parameters.customer_client_id }} \
               -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
               -var customer_client_secret=${{ parameters.customer_client_secret }} \
-              -var budget_amount=${{ parameters.budget_amount }} \
+              -var budget_amount=${{ parameters.budgeted_amount }} \
               -var vodafone_support_primary_L2_username=${{ parameters.vodafone_support_primary_L2_username }} \
               -var vodafone_support_primary_L2_useremail =${{ parameters.vodafone_support_primary_L2_useremail }} \
               -var customer_subscription_contributor_firstname=${{ parameters.customer_subscription_contributor_firstname }} \
