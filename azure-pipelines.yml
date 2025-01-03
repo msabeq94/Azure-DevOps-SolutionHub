@@ -94,7 +94,7 @@ parameters:
 
 
 stages:
-- stage: Intializing Providers
+- stage: IntializingProviders
   displayName: 'Initializing Providers'
   jobs:
     - job: 'InitializingProviders'
