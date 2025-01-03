@@ -137,7 +137,7 @@ stages:
               -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
               -var customer_client_secret=${{ parameters.customer_client_secret }} \
               -var location=${{ parameters.location }} \
-              -var domain_name=${{ parameters.default_domain_name }} \
+              -var domain_name=${{ parameters.customer_domain_name }} \
               -var customer_subscription_owner_first_name=${{ parameters.customer_subscription_owner_first_name }} \
               -var customer_subscription_owner_last_name=$(date +%S%3N)
 
@@ -175,5 +175,5 @@ stages:
 #               echo "Owner Principal: $(owner_principal)"
 
 #               seconds=$(date +%S)
-#               az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PASS-${seconds}" --value "$(owner_password)"
-#               az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PRINC-${seconds}" --value "$(owner_principal)"
+#               az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.customer_domain_name }}-PASS-${seconds}" --value "$(owner_password)"
+#               az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.customer_domain_name }}-PRINC-${seconds}" --value "$(owner_principal)"
