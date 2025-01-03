@@ -133,7 +133,7 @@ stages:
     steps:
       - task: AzureKeyVault@1
         inputs:
-          azureSubscription: 'vf-cor-devops-pcr-access'
+          ConnectedServiceName: 'vf-cor-devops-pcr-access'
           KeyVaultName: 'vf-core-devops-pcr-kv'
           SecretsFilter: 'terraform-backend-key'
           RunAsPreJob: true
