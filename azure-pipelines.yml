@@ -105,12 +105,13 @@ stages:
       pool: 'DevOps-Agents-VMS'
       steps:
         - script: |
-            az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
-            az account set -s ${{parameters.customer_subscription_id}}
-            Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
-            for Rprovider in "${Rproviders[@]}"; do
-              az provider register --namespace $Rprovider
-            done
+            echo "Initializing Providers" 
+            # az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+            # az account set -s ${{parameters.customer_subscription_id}}
+            # Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
+            # for Rprovider in "${Rproviders[@]}"; do
+            #   az provider register --namespace $Rprovider
+            # done
 #             for Rprovider in "${Rproviders[@]}"; do
 #               RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
 #               while [ "$RegistrationState" != "Registered" ]; do
