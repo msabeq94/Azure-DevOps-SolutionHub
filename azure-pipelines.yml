@@ -123,6 +123,7 @@ stages:
    
 - stage: TerraformRun
   displayName: 'Terraform Run'
+  dependsOn: IntializingProviders
   pool: 'DevOps-Agents-VMS'
   jobs:
 #   - job: 'InitializingProviders'
@@ -147,7 +148,6 @@ stages:
 # #               echo "$Rprovider registered."
 # #             done
   - job: ManualApprovalResourcesStep
-    dependsOn: IntializingProviders
     condition: and(always(), eq(variables.Action, 'destroy -auto-approve'))
     displayName: "Review and Approve Resources Cleanup"
     pool: server 
