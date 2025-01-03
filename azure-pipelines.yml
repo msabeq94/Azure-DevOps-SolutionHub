@@ -1,44 +1,57 @@
 trigger:
 - none
+
 parameters:
+- name: Action
+  displayName: Action
+  type: string
+  default: 'apply -auto-approve'
+  values:
+    - 'plan'
+    - 'apply -auto-approve'
+    - 'destroy -auto-approve'
+  description: Action to perform
+- name: country_code
+  displayName: country_code
+  type: string
+  default: 'eastus'
+  values:
+    - 'GB-Commercial'
+    - 'GB-Official'
+    - 'IT-Commercial'
+    - 'IE-Commercial'
+    - 'ES-Commercial'
+    - 'PT-Commercial'
+    - 'AL-Commercial'
+  description: Provide the regional tooling account
 - name: location
   displayName: "Azure region"
   type: string
   default: 'eastus'
-
 - name: customer_client_id
   displayName: "Customer Client ID"
   type: string
   default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
-
 - name: customer_client_secret
   displayName: "Customer Client Secret"
   type: string
   default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
-  
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
   default: "87431d80-c13c-4f97-8d52-4bd5ec6e617e"
-
 - name: customer_subscription_id
   displayName: "Customer Subscription ID"
   type: string
   default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
-  
 - name: default_domain_name
   displayName: "Default Domain Name"
   type: string
   default: "msabeqoutlook"
-
 - name: customer_subscription_owner_first_name
   displayName: "Subscription Owner First Name"
   type: string
   default: "devops"
-# - name: customer_subscription_owner_last_name 
-#   displayName: "Subscription Owner Last Name"
-#   type: string
-#   default: "sh"
 
 stages:
 - stage: TerraformRun
@@ -57,41 +70,30 @@ stages:
             terraform workspace new $workspace
             terraform init
 
-            # terraform plan \
-            #   -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
-            #   -var customer_client_id=${{ parameters.customer_client_id}} \
-            #   -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
-            #   -var customer_client_secret=${{ parameters.customer_client_secret }} \
-            #   -var location=${{ parameters.location }} \
-            #   -var domain_name=${{parameters.default_domain_name}} \
-            #   -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
-            #   -var customer_subscription_owner_last_name=$(date +%S%3N)
-
             terraform destroy --auto-approve \
               -var customer_subscription_id=${{ parameters.customer_subscription_id }} \
-              -var customer_client_id=${{ parameters.customer_client_id}} \
+              -var customer_client_id=${{ parameters.customer_client_id }} \
               -var customer_tenant_id=${{ parameters.customer_tenant_id }} \
               -var customer_client_secret=${{ parameters.customer_client_secret }} \
               -var location=${{ parameters.location }} \
-              -var domain_name=${{parameters.default_domain_name}} \
-              -var customer_subscription_owner_first_name=${{parameters.customer_subscription_owner_first_name}} \
-              -var customer_subscription_owner_last_name=$(date +%S%3N) 
+              -var domain_name=${{ parameters.default_domain_name }} \
+              -var customer_subscription_owner_first_name=${{ parameters.customer_subscription_owner_first_name }} \
+              -var customer_subscription_owner_last_name=$(date +%S%3N)
 
             # Extract outputs
-            owner_password=$(terraform output "customer_subscription_owner_password" | sed 's/^"//;s/"$//')          
+            owner_password=$(terraform output -raw "customer_subscription_owner_password")
             echo "Owner Password: $owner_password"
-            owner_principal=$(terraform output "user_principal_name" | sed 's/^"//;s/"$//')
+            owner_principal=$(terraform output -raw "user_principal_name")
             echo "Owner Principal: $owner_principal"
+
             # Set the output variables
             echo "##vso[task.setvariable variable=password;isOutput=true]$owner_password"
             echo "##vso[task.setvariable variable=principal;isOutput=true]$owner_principal"
           name: setVariables
-          
 
 - stage: savepassword
   dependsOn: TerraformRun
   pool: 'DevOps-Agents-VMS'
-  
   jobs:
     - job: SavePASSToKeyVault
       displayName: "Save password to KeyVault"
@@ -110,7 +112,7 @@ stages:
             inlineScript: |
               echo "Owner Password: $(owner_password)"
               echo "Owner Principal: $(owner_principal)"
-              
-                seconds=$(date +%S)
-                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PASS-${seconds}" --value "$(owner_password)"
-                az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{parameters.default_domain_name}}-PRINC-${seconds}" --value "$(owner_principal)"
+
+              seconds=$(date +%S)
+              az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PASS-${seconds}" --value "$(owner_password)"
+              az keyvault secret set --vault-name 'vf-core-devops-pcr-kv' --name "${{ parameters.default_domain_name }}-PRINC-${seconds}" --value "$(owner_principal)"

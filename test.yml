@@ -1,0 +1,24 @@
+parameters:
+- name: Action
+  displayName: Action
+  type: string
+  default: 'apply -auto-approve'
+  values:
+    - 'plan'
+    - 'apply -auto-approve'
+    - 'destroy -auto-approve'
+description: Action to perform
+
+- name: country_code
+  displayName: country_code
+  type: string
+  default: 'eastus'
+  values:
+    - 'GB-Commercial'
+    - 'GB-Official'
+    - 'IT-Commercial'
+    - 'IE-Commercial'
+    - 'ES-Commercial'
+    - 'PT-Commercial'
+    - 'AL-Commercial'
+  description: Provide the regional tooling account
