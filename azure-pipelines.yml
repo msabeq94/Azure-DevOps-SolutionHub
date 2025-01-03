@@ -122,7 +122,6 @@ stages:
 # #             done
    
 - stage: TerraformRun
-  dependsOn: IntializingProviders
   displayName: 'Terraform Run'
   pool: 'DevOps-Agents-VMS'
   jobs:
