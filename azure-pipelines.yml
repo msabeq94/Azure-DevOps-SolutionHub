@@ -57,7 +57,7 @@ parameters:
 - name: budgeted_amount
   displayName: "Budgeted Amount"
   type: number
-  default: 0
+  default: ""
 - name: vodafone_support_primary_L2_username
   displayName: "Vodafone Support Primary L2 Username"
   type: string
@@ -65,7 +65,7 @@ parameters:
 - name: vodafone_support_primary_L2_useremail
   displayName: "Vodafone Support Primary L2 User Email"
   type: string
-  default: ""
+  default: " "
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
