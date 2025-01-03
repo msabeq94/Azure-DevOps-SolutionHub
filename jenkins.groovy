@@ -7,25 +7,25 @@ pipeline{
         ansiColor('xterm')
     }
     parameters{
-        choice(name: 'Action', choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'Action to perform')
+        // choice(name: 'Action', choices: ['plan', 'apply -auto-approve', 'destroy -auto-approve'], description: 'Action to perform')
 	string(name: 'Branch', defaultValue: 'master', description: 'Application Branch or Tag to be deployed')
-        choice(name: 'country_code', choices: ['GB-Commercial', 'GB-Official', 'IT-Commercial', 'IE-Commercial', 'ES-Commercial', 'PT-Commercial', 'AL-Commercial'], description: 'Provide the regional tooling account')
-        string(name: 'customer_domain_name', defaultValue: '', description: 'Globally unique domain name of the customer')
-        validatingString(name: 'customer_subscription_owner_firstname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Firstname of the user to be added to the subscription owner group member list')
-        validatingString(name: 'customer_subscription_owner_lastname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Lastname of the user to be added to the subscription owner group member list')
-        validatingString(name: 'customer_subscription_contributor_firstname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Firstname of the user to be added to the subscription contributor group member list')
-        validatingString(name: 'customer_subscription_contributor_lastname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Lastname of the user to be added to the subscription contributor group member list')
-        validatingString(name: 'customer_security_contact_email', defaultValue: '', failedValidationMessage: 'Invalid email address', regex: '^$|^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$', description: 'Security Alert Recipient (email address)')
-        validatingString(name: 'customer_service_health_contact_email', defaultValue: '', failedValidationMessage: 'Invalid email address', regex: '^$|^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$', description: 'Azure Service Health Alert Recipient (email address)')
-        validatingString(name: 'customer_budget_contact_email', defaultValue: '', failedValidationMessage: 'Invalid email address', regex: '^$|^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$', description: 'Budget Alert Recipient(email address)')
-        validatingString(name: 'budgeted_amount', defaultValue: '', failedValidationMessage: 'Budget should be a valid number', regex: '^[0-9]*', description: 'The Budgeted amount')
-        string(name: 'vodafone_support_primary_L2_username', defaultValue: '', description: 'Username of Level2 primary support user')
-        string(name: 'vodafone_support_primary_L2_useremail', defaultValue: '', description: 'Email id of Level2 primary support user')
-        string(name: 'customer_subscription_id', defaultValue: '', description: '')
-        string(name: 'customer_client_id', defaultValue: '', description: '')
-        string(name: 'customer_tenant_id', defaultValue: '', description: '')
-        password(name: 'customer_client_secret', defaultValue: '', description: '')
-    }
+        // choice(name: 'country_code', choices: ['GB-Commercial', 'GB-Official', 'IT-Commercial', 'IE-Commercial', 'ES-Commercial', 'PT-Commercial', 'AL-Commercial'], description: 'Provide the regional tooling account')
+        // string(name: 'customer_domain_name', defaultValue: '', description: 'Globally unique domain name of the customer')
+        // validatingString(name: 'customer_subscription_owner_firstname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Firstname of the user to be added to the subscription owner group member list')
+        // validatingString(name: 'customer_subscription_owner_lastname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Lastname of the user to be added to the subscription owner group member list')
+        // validatingString(name: 'customer_subscription_contributor_firstname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Firstname of the user to be added to the subscription contributor group member list')
+        // validatingString(name: 'customer_subscription_contributor_lastname', defaultValue: '', failedValidationMessage: 'String with no space', regex: '^(^$|\\S)+$', description: 'Lastname of the user to be added to the subscription contributor group member list')
+        // validatingString(name: 'customer_security_contact_email', defaultValue: '', failedValidationMessage: 'Invalid email address', regex: '^$|^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$', description: 'Security Alert Recipient (email address)')
+        // validatingString(name: 'customer_service_health_contact_email', defaultValue: '', failedValidationMessage: 'Invalid email address', regex: '^$|^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$', description: 'Azure Service Health Alert Recipient (email address)')
+        // validatingString(name: 'customer_budget_contact_email', defaultValue: '', failedValidationMessage: 'Invalid email address', regex: '^$|^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$', description: 'Budget Alert Recipient(email address)')
+        // validatingString(name: 'budgeted_amount', defaultValue: '', failedValidationMessage: 'Budget should be a valid number', regex: '^[0-9]*', description: 'The Budgeted amount')
+    //     string(name: 'vodafone_support_primary_L2_username', defaultValue: '', description: 'Username of Level2 primary support user')
+    //     string(name: 'vodafone_support_primary_L2_useremail', defaultValue: '', description: 'Email id of Level2 primary support user')
+    //     string(name: 'customer_subscription_id', defaultValue: '', description: '')
+    //     string(name: 'customer_client_id', defaultValue: '', description: '')
+    //     string(name: 'customer_tenant_id', defaultValue: '', description: '')
+    //     password(name: 'customer_client_secret', defaultValue: '', description: '')
+    // }
     stages{
         stage('Approval On Delete'){
             when {

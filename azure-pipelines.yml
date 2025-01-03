@@ -14,7 +14,6 @@ parameters:
 - name: country_code
   displayName: country_code
   type: string
-  default: 'eastus'
   values:
     - 'GB-Commercial'
     - 'GB-Official'
@@ -23,19 +22,50 @@ parameters:
     - 'ES-Commercial'
     - 'PT-Commercial'
     - 'AL-Commercial'
-  
-- name: location
-  displayName: "Azure region"
+- name: customer_domain_name
+  displayName: "Customer Domain Name"
   type: string
-  default: 'eastus'
-- name: customer_client_id
-  displayName: "Customer Client ID"
+  default: ""
+- name: customer_subscription_owner_firstname
+  displayName: "Customer Subscription Owner First Name"
   type: string
-  default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
-- name: customer_client_secret
-  displayName: "Customer Client Secret"
+  default: ""
+- name: customer_subscription_owner_lastname
+  displayName: "Customer Subscription Owner Last Name"
   type: string
-  default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
+  default: ""
+- name: ustomer_subscription_contributor_firstname
+  displayName: "Customer Subscription Contributor First Name"
+  type: string
+  default: ""
+- name: customer_subscription_contributor_lastname
+  displayName: "Customer Subscription Contributor Last Name"
+  type: string
+  default: ""
+- name: customer_security_contact_email
+  displayName: "Customer Security Contact Email"
+  type: string
+  default: ""
+- name: customer_service_health_contact_email
+  displayName: "Customer Service Health Contact Email"
+  type: string
+  default: ""
+- name: customer_budget_contact_email
+  displayName: "Customer Budget Contact Email"
+  type: string
+  default: ""
+- name: budgeted_amount
+  displayName: "Budgeted Amount"
+  type: number
+  default: 0
+- name: vodafone_support_primary_L2_username
+  displayName: "Vodafone Support Primary L2 Username"
+  type: string
+  default: ""
+- name: vodafone_support_primary_L2_useremail
+  displayName: "Vodafone Support Primary L2 User Email"
+  type: string
+  default: ""
 - name: customer_tenant_id
   displayName: "Customer Tenant ID"
   type: string
@@ -44,14 +74,14 @@ parameters:
   displayName: "Customer Subscription ID"
   type: string
   default: "f5980816-b478-413b-ae0b-5fb6d820a88f"
-- name: default_domain_name
-  displayName: "Default Domain Name"
+- name: customer_client_id
+  displayName: "Customer Client ID"
   type: string
-  default: "msabeqoutlook"
-- name: customer_subscription_owner_first_name
-  displayName: "Subscription Owner First Name"
+  default: "14c278e4-bfb7-451a-8af2-40f0c1e7675f"
+- name: customer_client_secret
+  displayName: "Customer Client Secret"
   type: string
-  default: "devops"
+  default: "J-d8Q~vvfYol.6aJoA12mI_m9YjN3ab-vp5uecDO"
 
 stages:
 - stage: TerraformRun
