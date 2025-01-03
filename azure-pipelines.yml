@@ -168,6 +168,7 @@ stages:
       inputs:
         azureSubscription: 'vf-cor-devops-pcr-access'
         KeyVaultName: 'vf-core-devops-pcr-kv'
+
         SecretsFilter: 'terraformbackendkey'
         RunAsPreJob: true
     - script: |
@@ -176,7 +177,8 @@ stages:
             echo "Storage Account Key: $(terraformbackendkey)"
             
             
-            escaped_key=$(echo ${terraformbackendkey} | sed -e 's/[&/\]/\\&/g' -e 's/=/\\=/g' -e 's/+//g')
+            escaped_key=$(echo ${terraformbackendkey} 
+            #| sed -e 's/[&/\]/\\&/g' -e 's/=/\\=/g' -e 's/+//g')
             echo "Escaped Key: $escaped_key"
 
             sed -i "s/StorageAccountKey/${escaped_key}/g" main.tf
