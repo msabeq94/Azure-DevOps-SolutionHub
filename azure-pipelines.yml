@@ -10,7 +10,7 @@ parameters:
     - 'plan'
     - 'apply -auto-approve'
     - 'destroy -auto-approve'
-  description: Action to perform
+  
 - name: country_code
   displayName: country_code
   type: string
@@ -23,7 +23,7 @@ parameters:
     - 'ES-Commercial'
     - 'PT-Commercial'
     - 'AL-Commercial'
-  description: Provide the regional tooling account
+  
 - name: location
   displayName: "Azure region"
   type: string
