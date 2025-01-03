@@ -25,7 +25,7 @@ parameters:
 - name: customer_domain_name
   displayName: "Customer Domain Name"
   type: string
-  default: ""
+  default: "msabeqoutlook"
 - name: customer_subscription_owner_firstname
   displayName: "Customer Subscription Owner First Name"
   type: string
