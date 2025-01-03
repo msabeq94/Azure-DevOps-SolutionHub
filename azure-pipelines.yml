@@ -147,8 +147,8 @@ stages:
 # #               echo "$Rprovider registered."
 # #             done
   - job: ManualApprovalResourcesStep
-    # dependsOn: InitializingProviders
-    condition: eq(variables.Action, 'destroy -auto-approve')
+    dependsOn: IntializingProviders
+    condition: and(always(), eq(variables.Action, 'destroy -auto-approve'))
     displayName: "Review and Approve Resources Cleanup"
     pool: server 
     steps:
@@ -157,8 +157,9 @@ stages:
           notifyUsers: ""
           instructions: "Are you sure, you want to delete the configuration?"
   - job: TerraformJob
+    condition: always()   
     displayName: 'Terraform Job'
-    # dependsOn: ManualApprovalResourcesStep
+    dependsOn: ManualApprovalResourcesStep
     steps:
       - script: |
             # cd cmdb/customer
