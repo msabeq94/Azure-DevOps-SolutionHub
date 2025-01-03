@@ -170,7 +170,7 @@ stages:
   - job: TerraformJob
     condition: always()   
     displayName: 'Terraform Job'
-    dependsOn: 
+    dependsOn: Statetf
     steps:
       - script: |
             # cd cmdb/customer
