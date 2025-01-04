@@ -13,7 +13,8 @@ terraform {
     resource_group_name  = "DevOps-Msabeq"          # Can be passed via `-backend-config=`"resource_group_name=<resource group name>"` in the `init` command.
     storage_account_name = "vfdevopspcrstatefiles"                              # Can be passed via `-backend-config=`"storage_account_name=<storage account name>"` in the `init` command.
     container_name       = "pcrtfstate"                               # Can be passed via `-backend-config=`"container_name=<container name>"` in the `init` command.
-    key                  = "cststate.tfstate"                # Can be passed via `-backend-config=`"key=<blob key name>"` in the `init` command.
+    key                  = "cststate.tfstate" 
+    use_oidc             = true                # Can be passed via `-backend-config=`"key=<blob key name>"` in the `init` command.
     client_id            = "e7dce71f-5ae8-4ae1-9c3a-c558f929f9ca"  # Can also be set via `ARM_CLIENT_ID` environment variable.
     subscription_id      = "f5980816-b478-413b-ae0b-5fb6d820a88f"  # Can also be set via `ARM_SUBSCRIPTION_ID` environment variable.
     tenant_id            = "e22861cb-ba60-48a7-8d82-fa8e4267a5bd"  # Can also be set via `ARM_TENANT_ID` environment variable.
