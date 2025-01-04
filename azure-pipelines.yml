@@ -149,20 +149,10 @@ stages:
     dependsOn: ManualApprovalResourcesStep 
 
     steps:
-    - task: AzureKeyVault@2
-      inputs:
-        azureSubscription: 'vf-cor-devops-pcr-access'
-        KeyVaultName: 'vf-core-devops-pcr-kv'
-        SecretsFilter: 'terraformbackendkey'
-        RunAsPreJob: true
-
     - script: |
             cd cmdb/customer
 
             sed -i "s/cststate/${{ parameters.customer_domain_name }}/g" main.tf
-
-            escaped_key=$(printf '%s' "${terraformbackendkey}" | sed -e 's/[&/\]/\\&/g')
-            sed -i "s/StorageAccountKey/${escaped_key}/g" main.tf
 
             terraform init
             terraform workspace select ${{parameters.customer_domain_name}} || terraform workspace new ${{parameters.customer_domain_name}} 
@@ -184,5 +174,174 @@ stages:
               -var vodafone_support_primary_L2_useremail=${{ parameters.vodafone_support_primary_L2_useremail }} \
               -var customer_subscription_contributor_firstname=${{ parameters.customer_subscription_contributor_firstname }} \
               -var customer_subscription_contributor_lastname=${{ parameters.customer_subscription_contributor_lastname }}
-      env:
-            terraformbackendkey: $(terraformbackendkey)
+
+- stage: KeyVaultIAMSettings
+  jobs:
+    - job: UpdateIAMAccess
+      steps:
+        - script: |
+            az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+            az account set -s ${{parameters.customer_subscription_id}}
+
+            GroupObjectIdKey=$(az ad group show --group "vf-core-keyvault-mgmt" --query objectId --output tsv)
+            KeyVaultScope=$(az keyvault show --resource-group $RGname --query id --output tsv)
+
+            if [ "${{parameters.country_code}}" == "GB-Commercial" ]; then
+              az role assignment create --role "Key Vault Administrator" --assignee "1f3fbac3-31a5-4346-bec7-3e8cca6d1e77" --scope $KeyVaultScope --assignee-principal-type "ForeignGroup"
+              az role assignment create --role "Key Vault Administrator" --assignee $GroupObjectIdKey --scope $KeyVaultScope
+              echo "Key Vault ${{parameters.country_code}} (IAM access) settings updated successfully."
+            elif [ "${{parameters.country_code}}" == "IT-Commercial" ]; then
+              az role assignment create --role "Key Vault Administrator" --assignee "dd89b7bf-9972-41e0-90ab-9692c9756887" --scope $KeyVaultScope --assignee-principal-type "ForeignGroup"
+              az role assignment create --role "Key Vault Administrator" --assignee $GroupObjectIdKey --scope $KeyVaultScope
+              echo "Key Vault ${{parameters.country_code}} (IAM access) settings updated successfully."
+            elif [ "${{parameters.country_code}}" == "IE-Commercial" ]; then
+              az role assignment create --role "Key Vault Administrator" --assignee "e47928d8-7dd3-498f-8ceb-fa17870638c7" --scope $KeyVaultScope --assignee-principal-type "ForeignGroup"
+              az role assignment create --role "Key Vault Administrator" --assignee $GroupObjectIdKey --scope $KeyVaultScope
+              echo "Key Vault ${{parameters.country_code}} (IAM access) setting updated successfully."
+            elif [ "${{parameters.country_code}}" == "ES-Commercial" ]; then
+              az role assignment create --role "Key Vault Administrator" --assignee "78d91dcc-fc20-41b7-a8ad-6c12d8f6d7ff" --scope $KeyVaultScope --assignee-principal-type "ForeignGroup"
+              az role assignment create --role "Key Vault Administrator" --assignee $GroupObjectIdKey --scope $KeyVaultScope
+              echo "Key Vault ${{parameters.country_code}} (IAM access) setting updated successfully."
+            elif [ "${{parameters.country_code}}" == "PT-Commercial" ]; then
+              az role assignment create --role "Key Vault Administrator" --assignee "2a5dc68f-8c5f-4c4d-87aa-fe0771ef3d4f" --scope $KeyVaultScope --assignee-principal-type "ForeignGroup"
+              az role assignment create --role "Key Vault Reader" --assignee "a0f138ea-7f3c-4b3d-a83c-4ee823e14167" --scope $KeyVaultScope --assignee-principal-type "ForeignGroup"
+              az role assignment create --role "Key Vault Administrator" --assignee $GroupObjectIdKey --scope $KeyVaultScope
+              echo "Key Vault ${{parameters.country_code}} (IAM access) setting updated successfully."
+            fi
+      displayName: 'Update IAM Access for Key Vault'
+
+- stage: EntraIDDiagnosticSettings
+  jobs:
+    - job: CreateDiagnosticSettings
+      steps:
+        - script: |
+            az login --service-principal -u ${{parameters.customer_client_id}} -p ${{parameters.customer_client_secret}} --tenant ${{parameters.customer_tenant_id}}
+            az account set -s ${{parameters.customer_subscription_id}}
+  
+            AADToken=$(az account get-access-token --resource-type ms-graph --query accessToken --output tsv)
+            EntraapiEndpoint="https://management.azure.com/providers/microsoft.aadiam/diagnosticSettings/vf-core-audit-logs-aad?api-version=2017-04-01-preview"
+            subscriptionId=$(az account show --query id --output tsv)
+            header="Authorization: Bearer $AADToken"
+
+            RGname=$(az group list --query "[?contains(name, 'vf-core-') && contains(name, '-resources-rg')].name | [0]" --output tsv)
+            StorageAccount=$(az storage account list --resource-group $RGname --query '[0].name' --output tsv)
+            LogAnalytics="vf-core-log-analytics"
+
+            read -r -d '' Entrabody << EOM
+            {
+              "properties": {
+                "logs": [
+                  { "category": "AuditLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "ProvisioningLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "NonInteractiveUserSignInLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "RiskyUsers", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "UserRiskEvents", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "NetworkAccessTrafficLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "RiskyServicePrincipals", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "ServicePrincipalRiskEvents", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "EnrichedOffice365AuditLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "MicrosoftGraphActivityLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "ServicePrincipalSignInLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "ManagedIdentitySignInLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } },
+                  { "category": "ADFSSignInLogs", "enabled": true, "retentionPolicy": { "days": 0, "enabled": false } }
+                ],
+                "metrics": [],
+                "storageAccountId": "/subscriptions/$subscriptionId/resourceGroups/$RGname/providers/Microsoft.Storage/storageAccounts/$StorageAccount",
+                "workspaceId": "/subscriptions/$subscriptionId/resourceGroups/$RGname/providers/Microsoft.OperationalInsights/workspaces/$LogAnalytics"
+              }
+            }
+            EOM
+  
+            # Pause script for 5 seconds
+            sleep 5
+  
+            # Make API request
+            Entraresponse=$(curl -X PUT -H "$header" -H "Content-Type: application/json" -d "$Entrabody" $EntraapiEndpoint)
+  
+            # Display success message
+            echo "Diagnostic settings created successfully."
+      displayName: 'Create Diagnostic Settings'
+
+- stage: SetupContinuousExport
+  jobs:
+    - job: ConfigureExport
+      steps:
+        - script: |
+            az login --service-principal -u "${{parameters.customer_client_id}}" -p "${{parameters.customer_client_secret}}" --tenant "${{parameters.customer_tenant_id}}"
+            az account set -s "${{parameters.customer_subscription_id}}"
+    
+            # Retrieve the required variables
+            subscriptionId=$(az account show --query id --output tsv)
+            RGname=$(az group list --query "[?contains(name, 'vf-core-') && contains(name, '-resources-rg')].name | [0]" --output tsv)
+            RGLocation=$(az group show --name "$RGname" --query location --output tsv)
+            StorageAccount=$(az storage account list --resource-group "$RGname" --query '[0].name' --output tsv)
+            LogAnalytics="vf-core-log-analytics"
+            AADToken=$(az account get-access-token --resource-type ms-graph --query accessToken --output tsv)
+    
+            # Define API endpoint and header
+            ContiniousExportEndpoint="https://management.azure.com/subscriptions/$subscriptionId/resourceGroups/$RGname/providers/Microsoft.Security/automations/ExportToWorkspace?api-version=2019-01-01-preview"
+            header="Authorization: Bearer $AADToken"
+    
+            # Define the body for the API request
+            read -r -d '' ContiniousExportbody << EOM
+            {
+              "properties": {
+                "description": "",
+                "isEnabled": true,
+                "scopes": [
+                  {
+                    "description": "scope for subscription $subscriptionId",
+                    "scopePath": "/subscriptions/$subscriptionId"
+                  }
+                ],
+                "sources": [
+                  { "eventSource": "Assessments", "ruleSets": [
+                      { "rules": [
+                          { "propertyJPath": "type", "propertyType": "String", "expectedValue": "Microsoft.Security/assessments", "operator": "Contains" },
+                          { "propertyJPath": "properties.metadata.severity", "propertyType": "String", "expectedValue": "medium", "operator": "Equals" }
+                      ]},
+                      { "rules": [
+                          { "propertyJPath": "type", "propertyType": "String", "expectedValue": "Microsoft.Security/assessments", "operator": "Contains" },
+                          { "propertyJPath": "properties.metadata.severity", "propertyType": "String", "expectedValue": "high", "operator": "Equals" }
+                      ]}
+                  ]},
+                  { "eventSource": "SubAssessments", "ruleSets": [
+                      { "rules": [
+                          { "propertyJPath": "properties.status.severity", "propertyType": "String", "expectedValue": "medium", "operator": "Equals" }
+                      ]},
+                      { "rules": [
+                          { "propertyJPath": "properties.status.severity", "propertyType": "String", "expectedValue": "high", "operator": "Equals" }
+                      ]}
+                  ]},
+                  { "eventSource": "Alerts", "ruleSets": [
+                      { "rules": [
+                          { "propertyJPath": "Severity", "propertyType": "String", "expectedValue": "medium", "operator": "Equals" }
+                      ]},
+                      { "rules": [
+                          { "propertyJPath": "Severity", "propertyType": "String", "expectedValue": "high", "operator": "Equals" }
+                      ]}
+                  ]}
+                ],
+                "actions": [
+                  {
+                    "workspaceResourceId": "/subscriptions/$subscriptionId/resourcegroups/$RGname/providers/microsoft.operationalinsights/workspaces/$LogAnalytics",
+                    "actionType": "Workspace"
+                  }
+                ]
+              },
+              "name": "ExportToWorkspace",
+              "type": "Microsoft.Security/automations",
+              "location": "$RGLocation",
+              "tags": {}
+            }
+            EOM
+    
+            # Pause script for 5 seconds
+            sleep 5
+    
+            # Make API request
+            continousExportResponse=$(curl -X PUT -H "$header" -H "Content-Type: application/json" -d "$ContiniousExportbody" "$ContiniousExportEndpoint")
+    
+            # Display success message
+            echo "Continuous export settings created successfully."
+      displayName: 'Create Continuous Export Settings'

@@ -4,13 +4,14 @@ provider "aws" {
 }
 
 terraform {
-    backend "azurerm" {
-    resource_group_name = "DevOps-Msabeq"
-    storage_account_name = "vfdevopspcrstatefiles"
-    container_name = "pcrtfstate"
-    key = "cststate.tfstate"
-    access_key = "StorageAccountKey"
-  }
+      backend "azurerm" {
+    resource_group_name  = "DevOps-Msabeq"          
+    storage_account_name = "vfdevopspcrstatefiles"                              
+    container_name       = "pcrtfstate"                               
+    key                  = "cststate.tfstate" 
+    use_azuread_auth     = true
+    use_msi              = true
+}
 
 
   required_providers {
