@@ -53,7 +53,7 @@ terraform {
 #     # tenant_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_TENANT_ID` environment variable.
 #     use_azuread_auth     = true                                    # Can also be set via `ARM_USE_AZUREAD` environment variable.
 #   }
-# }
+}
 
 provider "azurerm" {
   features {}
