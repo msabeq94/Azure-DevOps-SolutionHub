@@ -19,7 +19,7 @@ terraform {
     client_secret        = "WhJ8Q~2ZQIBsAsMJjKlgXBdnVK1FHXsmXQgIcbqD"  # Can also be set via `ARM_CLIENT_SECRET` environment variable.
     subscription_id      = "f5980816-b478-413b-ae0b-5fb6d820a88f"  # Can also be set via `ARM_SUBSCRIPTION_ID` environment variable.
     tenant_id            = "e22861cb-ba60-48a7-8d82-fa8e4267a5bd"  # Can also be set via `ARM_TENANT_ID` environment variable.
-    use_azuread_auth     = true                                    # Can also be set via `ARM_USE_AZUREAD` environment variable.
+                                     # Can also be set via `ARM_USE_AZUREAD` environment variable.
   }
 
 
