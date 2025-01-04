@@ -9,27 +9,36 @@ terraform {
       # tenant_id = var.customer_tenant_id
     }
   }
-  backend "azurerm" {
-    resource_group_name = "DevOps-Msabeq"
-    storage_account_name = "vfdevopspcrstatefiles"
-    container_name = "pcrtfstate"
-    key = "cststate.tfstate"
-    access_key = "StorageAccountKey"
-  }
-}
-terraform {
-  backend "azurerm" {
-    resource_group_name  = "StorageAccount-ResourceGroup"          # Can be passed via `-backend-config=`"resource_group_name=<resource group name>"` in the `init` command.
-    storage_account_name = "abcd1234"                              # Can be passed via `-backend-config=`"storage_account_name=<storage account name>"` in the `init` command.
-    container_name       = "tfstate"                               # Can be passed via `-backend-config=`"container_name=<container name>"` in the `init` command.
-    key                  = "prod.terraform.tfstate"                # Can be passed via `-backend-config=`"key=<blob key name>"` in the `init` command.
-    use_oidc             = true                                    # Can also be set via `ARM_USE_OIDC` environment variable.
-    client_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_CLIENT_ID` environment variable.
-    subscription_id      = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_SUBSCRIPTION_ID` environment variable.
-    tenant_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_TENANT_ID` environment variable.
+   backend "azurerm" {
+    resource_group_name  = "DevOps-Msabeq"          # Can be passed via `-backend-config=`"resource_group_name=<resource group name>"` in the `init` command.
+    storage_account_name = "vfdevopspcrstatefiles"                              # Can be passed via `-backend-config=`"storage_account_name=<storage account name>"` in the `init` command.
+    container_name       = "pcrtfstate"                               # Can be passed via `-backend-config=`"container_name=<container name>"` in the `init` command.
+    key                  = "cststate.tfstate"                # Can be passed via `-backend-config=`"key=<blob key name>"` in the `init` command.
+    # client_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_CLIENT_ID` environment variable.
+    # subscription_id      = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_SUBSCRIPTION_ID` environment variable.
+    # tenant_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_TENANT_ID` environment variable.
     use_azuread_auth     = true                                    # Can also be set via `ARM_USE_AZUREAD` environment variable.
   }
+  # backend "azurerm" {
+  #   resource_group_name = "DevOps-Msabeq"
+  #   storage_account_name = "vfdevopspcrstatefiles"
+  #   container_name = "pcrtfstate"
+  #   key = "cststate.tfstate"
+  #   access_key = "StorageAccountKey"
+  # }
 }
+# terraform {
+#   backend "azurerm" {
+#     resource_group_name  = "DevOps-Msabeq"          # Can be passed via `-backend-config=`"resource_group_name=<resource group name>"` in the `init` command.
+#     storage_account_name = "vfdevopspcrstatefiles"                              # Can be passed via `-backend-config=`"storage_account_name=<storage account name>"` in the `init` command.
+#     container_name       = "pcrtfstate"                               # Can be passed via `-backend-config=`"container_name=<container name>"` in the `init` command.
+#     key                  = "cststate.tfstate"                # Can be passed via `-backend-config=`"key=<blob key name>"` in the `init` command.
+#     # client_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_CLIENT_ID` environment variable.
+#     # subscription_id      = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_SUBSCRIPTION_ID` environment variable.
+#     # tenant_id            = "00000000-0000-0000-0000-000000000000"  # Can also be set via `ARM_TENANT_ID` environment variable.
+#     use_azuread_auth     = true                                    # Can also be set via `ARM_USE_AZUREAD` environment variable.
+#   }
+# }
 
 provider "azurerm" {
   features {}
