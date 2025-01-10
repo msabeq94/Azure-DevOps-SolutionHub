@@ -108,18 +108,30 @@ stages:
             az account set -s ${{parameters.customer_subscription_id}}
 
             Rproviders=("Microsoft.Management" "Microsoft.KeyVault" "Microsoft.Network" "Microsoft.Advisor" "Microsoft.Storage" "Microsoft.OperationalInsights" "Microsoft.PolicyInsights" "Microsoft.Kusto" "Microsoft.App" "Microsoft.ManagedIdentity" "Microsoft.Security" "Microsoft.ADHybridHealthService" "microsoft.insights")
+            # Loop through the resource providers
             for Rprovider in "${Rproviders[@]}"; do
-              az provider register --namespace $Rprovider
+              echo "Attempting to register $Rprovider..."
+
+              # Attempt to register the provider
+              if ! az provider register --namespace "$Rprovider"; then
+                echo "Error: Failed to register $Rprovider. Skipping to the next provider..."
+                continue
+              fi
+
+              echo "Registration command issued successfully for $Rprovider. Checking status..."
+
+              # Check the registration status until it becomes "Registered"
+              RegistrationState=$(az provider show --namespace "$Rprovider" --query 'registrationState' --output tsv 2>/dev/null)
+              while [ "$RegistrationState" != "Registered" ]; do
+                echo "Current state of $Rprovider: $RegistrationState. Waiting 5 seconds..."
+                sleep 5
+                RegistrationState=$(az provider show --namespace "$Rprovider" --query 'registrationState' --output tsv 2>/dev/null)
+              done
+
+              echo "$Rprovider is now registered."
             done
 
-            for Rprovider in "${Rproviders[@]}"; do
-              RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
-              while [ "$RegistrationState" != "Registered" ]; do
-                sleep 5
-                RegistrationState=$(az provider show --namespace $Rprovider --query 'registrationState' --output tsv)
-              done
-              echo "$Rprovider registered."
-            done
+            echo "All providers processed."
    
 - stage: TerraformRun
   displayName: 'Terraform Run'
